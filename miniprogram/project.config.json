@@ -1,0 +1,14 @@
+{
+  "miniprogramRoot": "./",
+  "projectname": "study-bonus",
+  "appid": "wx3a8763ff571224d6",
+  "compileType": "miniprogram",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "postcss": true,
+    "minified": true
+  },
+  "libVersion": "2.19.4",
+  "cloudfunctionRoot": "../cloudfunctions/"
+}

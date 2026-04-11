@@ -1,0 +1,44 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/auth/auth",
+    "pages/reward/reward",
+    "pages/prize/prize",
+    "pages/admin/admin"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "奖励兑换",
+    "navigationBarTitleStyle": "black"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#1890ff",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页",
+        "iconPath": "images/home.png",
+        "selectedIconPath": "images/home-active.png"
+      },
+      {
+        "pagePath": "pages/reward/reward",
+        "text": "奖励",
+        "iconPath": "images/reward.png",
+        "selectedIconPath": "images/reward-active.png"
+      },
+      {
+        "pagePath": "pages/prize/prize",
+        "text": "奖品",
+        "iconPath": "images/prize.png",
+        "selectedIconPath": "images/prize-active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

@@ -1,0 +1,263 @@
+page {
+  background-color: #f5f5f5;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.container {
+  padding: 20rpx;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40rpx 0;
+}
+
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 60rpx;
+  background-color: #ddd;
+}
+
+.nickname {
+  margin-top: 20rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.points-card {
+  background: linear-gradient(135deg, #1890ff, #36aaff);
+  padding: 40rpx;
+  border-radius: 16rpx;
+  color: #fff;
+  text-align: center;
+  margin: 20rpx;
+}
+
+.points-card .label {
+  font-size: 24rpx;
+  opacity: 0.8;
+}
+
+.points-card .points {
+  font-size: 60rpx;
+  font-weight: bold;
+  margin-top: 10rpx;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-around;
+  padding: 40rpx;
+}
+
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.action-icon {
+  width: 80rpx;
+  height: 80rpx;
+  margin-bottom: 10rpx;
+}
+
+.admin-btn {
+  margin: 40rpx;
+  padding: 20rpx;
+  background: #ff4d4f;
+  color: #fff;
+  text-align: center;
+  border-radius: 8rpx;
+}
+
+.title {
+  font-size: 40rpx;
+  font-weight: bold;
+  text-align: center;
+  margin: 40rpx 0;
+}
+
+.input {
+  border: 1rpx solid #ddd;
+  padding: 20rpx;
+  margin: 20rpx;
+  border-radius: 8rpx;
+  background: #fff;
+}
+
+.btn {
+  margin: 20rpx;
+  background: #1890ff;
+  color: #fff;
+}
+
+.switch {
+  text-align: center;
+  color: #1890ff;
+  margin: 20rpx;
+}
+
+.section {
+  margin: 20rpx;
+  padding: 20rpx;
+  background: #fff;
+  border-radius: 8rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+}
+
+.description {
+  width: 100%;
+  height: 200rpx;
+  border: 1rpx solid #ddd;
+  padding: 20rpx;
+  border-radius: 8rpx;
+  box-sizing: border-box;
+}
+
+.list {
+  height: 600rpx;
+}
+
+.item {
+  padding: 20rpx;
+  border-bottom: 1rpx solid #eee;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.item-desc {
+  width: 100%;
+}
+
+.item-status {
+  font-size: 24rpx;
+}
+
+.status-pending {
+  color: #faad14;
+}
+
+.status-approved {
+  color: #52c41a;
+}
+
+.status-rejected {
+  color: #ff4d4f;
+}
+
+.item-points {
+  color: #52c41a;
+  font-weight: bold;
+}
+
+.empty {
+  text-align: center;
+  color: #999;
+  padding: 40rpx;
+}
+
+.prize-list {
+  height: calc(100vh - 200rpx);
+}
+
+.prize-item {
+  display: flex;
+  padding: 20rpx;
+  background: #fff;
+  margin: 10rpx;
+  border-radius: 8rpx;
+}
+
+.prize-image {
+  width: 150rpx;
+  height: 150rpx;
+  border-radius: 8rpx;
+  background: #eee;
+}
+
+.prize-info {
+  flex: 1;
+  margin-left: 20rpx;
+}
+
+.prize-name {
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.prize-desc {
+  color: #666;
+  font-size: 24rpx;
+}
+
+.prize-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10rpx;
+}
+
+.prize-points {
+  color: #ff4d4f;
+  font-weight: bold;
+}
+
+.prize-inventory {
+  color: #666;
+  font-size: 24rpx;
+}
+
+.redeem-btn {
+  align-self: center;
+}
+
+.dashboard {
+  display: flex;
+  justify-content: space-around;
+  padding: 20rpx;
+}
+
+.stat-card {
+  flex: 1;
+  text-align: center;
+  padding: 30rpx;
+  background: #fff;
+  margin: 10rpx;
+  border-radius: 8rpx;
+}
+
+.stat-num {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #1890ff;
+}
+
+.stat-label {
+  color: #666;
+}
+
+.tabs {
+  display: flex;
+  background: #fff;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx;
+  border-bottom: 4rpx solid transparent;
+}
+
+.tab.active {
+  border-bottom-color: #1890ff;
+  color: #1890ff;
+}

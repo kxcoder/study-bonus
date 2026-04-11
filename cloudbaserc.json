@@ -1,0 +1,25 @@
+{
+  "envId": "pre-1guapblme2b25ae0",
+  "functions": [
+    {
+      "name": "auth",
+      "path": "./cloudfunctions/auth"
+    },
+    {
+      "name": "reward",
+      "path": "./cloudfunctions/reward"
+    },
+    {
+      "name": "prize",
+      "path": "./cloudfunctions/prize"
+    },
+    {
+      "name": "redemption",
+      "path": "./cloudfunctions/redemption"
+    },
+    {
+      "name": "admin",
+      "path": "./cloudfunctions/admin"
+    }
+  ]
+}

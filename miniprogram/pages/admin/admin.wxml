@@ -1,0 +1,45 @@
+<view class="container">
+  <view class="dashboard">
+    <view class="stat-card">
+      <text class="stat-num">{{dashboard.pending_rewards}}</text>
+      <text class="stat-label">待审核奖励</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-num">{{dashboard.pending_redemptions}}</text>
+      <text class="stat-label">待审核兑换</text>
+    </view>
+  </view>
+
+  <view class="tabs">
+    <view class="tab {{activeTab === 'reward' ? 'active' : ''}}" data-tab="reward" bindtap="switchTab">奖励</view>
+    <view class="tab {{activeTab === 'redemption' ? 'active' : ''}}" data-tab="redemption" bindtap="switchTab">兑换</view>
+  </view>
+
+  <scroll-view scroll-y class="list">
+    <block wx:if="{{activeTab === 'reward'}}">
+      <block wx:for="{{pendingRewards}}" wx:key="id">
+        <view class="item" bindtap="showActionSheet" data-item="{{item}}">
+          <text class="item-user">{{item.user.nickname}}</text>
+          <text class="item-desc">{{item.description}}</text>
+          <text class="item-date">{{item.created_at}}</text>
+        </view>
+      </block>
+      <view wx:if="{{pendingRewards.length === 0}}" class="empty">
+        <text>暂无待审核</text>
+      </view>
+    </block>
+
+    <block wx:if="{{activeTab === 'redemption'}}">
+      <block wx:for="{{pendingRedemptions}}" wx:key="id">
+        <view class="item" bindtap="showActionSheet" data-item="{{item}}">
+          <text class="item-user">{{item.user.nickname}}</text>
+          <text class="item-desc">{{item.prize.name}}</text>
+          <text class="item-date">{{item.created_at}}</text>
+        </view>
+      </block>
+      <view wx:if="{{pendingRedemptions.length === 0}}" class="empty">
+        <text>暂无待审核</text>
+      </view>
+    </block>
+  </scroll-view>
+</view>

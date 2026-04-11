@@ -1,0 +1,25 @@
+<view class="container">
+  <view class="header">
+    <text>可用积分：{{userPoints}}</text>
+  </view>
+
+  <scroll-view scroll-y class="prize-list">
+    <block wx:for="{{prizes}}" wx:key="id">
+      <view class="prize-item">
+        <image wx:if="{{item.image}}" class="prize-image" src="{{item.image}}" mode="aspectFill"></image>
+        <view class="prize-info">
+          <text class="prize-name">{{item.name}}</text>
+          <text class="prize-desc">{{item.description}}</text>
+          <view class="prize-footer">
+            <text class="prize-points">{{item.points_cost}}积分</text>
+            <text class="prize-inventory">库存: {{item.inventory}}</text>
+          </view>
+        </view>
+        <button class="redeem-btn" size="mini" bindtap="redeem" data-prize="{{item}}">兑换</button>
+      </view>
+    </block>
+    <view wx:if="{{prizes.length === 0}}" class="empty">
+      <text>暂无奖品</text>
+    </view>
+  </scroll-view>
+</view>

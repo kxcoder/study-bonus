@@ -1,0 +1,22 @@
+<view class="container">
+  <view class="section">
+    <textarea class="description" placeholder="描述你的成就..." bindinput="inputDescription" value="{{description}}"></textarea>
+    <button class="btn" bindtap="submitReward">提交申请</button>
+  </view>
+
+  <view class="section">
+    <text class="section-title">申请记录</text>
+    <scroll-view scroll-y class="list">
+      <block wx:for="{{rewards}}" wx:key="id">
+        <view class="item">
+          <text class="item-desc">{{item.description}}</text>
+          <text class="item-status status-{{item.status}}">{{item.status}}</text>
+          <text wx:if="{{item.points}}" class="item-points">+{{item.points}}</text>
+        </view>
+      </block>
+      <view wx:if="{{rewards.length === 0}}" class="empty">
+        <text>暂无记录</text>
+      </view>
+    </scroll-view>
+  </view>
+</view>
