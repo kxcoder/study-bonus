@@ -167,7 +167,7 @@ Page({
         this.hideForm();
         this.loadPrizes();
       } else {
-        wx.showToast({ title: res.result?.error || '操作失败', icon: 'none' });
+        wx.showToast({ title: (res.result && res.result.error) || '操作失败', icon: 'none' });
       }
     }).catch(() => {
       this.setData({ submitting: false });

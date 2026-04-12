@@ -1,5 +1,4 @@
 const cloud = require('wx-server-sdk');
-const crypto = require('crypto');
 
 cloud.init({
   env: cloud.DYNAMIC_CURRENT_ENV,
@@ -9,7 +8,13 @@ const db = cloud.database();
 const _ = db.command;
 
 function hashPassword(password) {
-  return crypto.createHash('sha256').update(password).digest('hex');
+  let hash = 0;
+  for (let i = 0; i < password.length; i++) {
+    const char = password.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash).toString(16).padStart(8, '0');
 }
 
 function verifyPassword(password, hash) {
@@ -63,6 +68,7 @@ async function handleLogin(openid, data) {
           nickname: data.nickname || '用户',
           role: 'child',
           points_balance: 0,
+          frozen_balance: 0,
           is_first_login: false,
           password_hash: '',
           created_at: db.serverDate(),
@@ -73,6 +79,7 @@ async function handleLogin(openid, data) {
         nickname: data.nickname || '用户',
         role: 'child',
         points_balance: 0,
+        frozen_balance: 0,
         is_first_login: false,
       };
     } else {
@@ -85,8 +92,10 @@ async function handleLogin(openid, data) {
         openid: user.openid,
         nickname: user.nickname,
         role: user.role,
-        points_balance: user.points_balance,
+        points_balance: user.points_balance || 0,
+        frozen_balance: user.frozen_balance || 0,
         is_first_login: user.is_first_login,
+        avatar: user.avatar || '',
       },
     };
   } catch (err) {
@@ -113,8 +122,10 @@ async function handlePasswordLogin(username, password) {
         openid: user.openid,
         nickname: user.nickname,
         role: user.role,
-        points_balance: user.points_balance,
+        points_balance: user.points_balance || 0,
+        frozen_balance: user.frozen_balance || 0,
         is_first_login: user.is_first_login,
+        avatar: user.avatar || '',
       },
     };
   } catch (err) {
@@ -174,8 +185,10 @@ async function getUser(openid) {
         openid: user.openid,
         nickname: user.nickname,
         role: user.role,
-        points_balance: user.points_balance,
+        points_balance: user.points_balance || 0,
+        frozen_balance: user.frozen_balance || 0,
         is_first_login: user.is_first_login,
+        avatar: user.avatar || '',
       },
     };
   } catch (err) {
@@ -236,6 +249,7 @@ async function updateUser(openid, data) {
   try {
     const updateData = {};
     if (data.nickname) updateData.nickname = data.nickname;
+    if (data.avatar) updateData.avatar = data.avatar;
 
     if (Object.keys(updateData).length === 0) {
       return { ok: false, error: '没有要更新的内容' };

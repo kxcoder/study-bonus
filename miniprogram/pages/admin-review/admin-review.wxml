@@ -22,8 +22,8 @@
           <text class="item-desc">{{item.description}}</text>
           <view class="item-footer">
             <text class="item-date">{{item.created_at}}</text>
-            <text wx:if="{{item.status === 'approved'}}" class="item-points">+{{item.points}}积分</text>
-            <text wx:if="{{item.admin_note}}" class="item-note">备注: {{item.admin_note}}</text>
+            <text wx:if="{{item.status === 'approved' && item.points}}" class="item-points">+{{item.points}}积分</text>
+            <text wx:if="{{item.status === 'rejected' && item.admin_note}}" class="item-reason">拒绝原因: {{item.admin_note}}</text>
           </view>
         </view>
       </block>
@@ -36,10 +36,11 @@
             <text class="item-user">{{item.user ? item.user.nickname : '未知用户'}}</text>
             <text class="item-status status-{{item.status}}">{{statusMap[item.status]}}</text>
           </view>
-          <text class="item-desc">{{item.prize ? item.prize.name : '未知奖品'}}</text>
+          <text class="item-desc">{{item.prize_name || (item.prize ? item.prize.name : '未知奖品')}}</text>
           <view class="item-footer">
             <text class="item-date">{{item.created_at}}</text>
-            <text wx:if="{{item.admin_note}}" class="item-note">备注: {{item.admin_note}}</text>
+            <text wx:if="{{item.points_cost}}" class="item-points">-{{item.points_cost}}积分</text>
+            <text wx:if="{{item.status === 'rejected' && item.admin_note}}" class="item-reason">拒绝原因: {{item.admin_note}}</text>
           </view>
         </view>
       </block>
@@ -53,4 +54,38 @@
       <text>加载更多</text>
     </view>
   </scroll-view>
+
+  <view class="modal" wx:if="{{showPointsModal}}">
+    <view class="modal-mask" bindtap="hidePointsModal"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">批准奖励</text>
+      </view>
+      <view class="modal-body">
+        <text class="modal-desc">为 "{{currentItem ? currentItem.user.nickname : ''}}" 奖励积分</text>
+        <input class="modal-input" type="number" placeholder="输入积分（必须为数字）" value="{{pointsInput}}" focus="{{showPointsModal}}" bindinput="bindPointsInput" />
+      </view>
+      <view class="modal-footer">
+        <button class="btn" bindtap="hidePointsModal">取消</button>
+        <button class="btn btn-primary" bindtap="confirmPoints">确定</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="modal" wx:if="{{showRejectModal}}">
+    <view class="modal-mask" bindtap="hideRejectModal"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">拒绝申请</text>
+      </view>
+      <view class="modal-body">
+        <text class="modal-desc">请输入拒绝原因</text>
+        <input class="modal-input" placeholder="输入拒绝原因" value="{{rejectInput}}" focus="{{showRejectModal}}" bindinput="bindRejectInput" />
+      </view>
+      <view class="modal-footer">
+        <button class="btn" bindtap="hideRejectModal">取消</button>
+        <button class="btn btn-primary" bindtap="confirmReject">确定</button>
+      </view>
+    </view>
+  </view>
 </view>

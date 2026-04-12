@@ -1,3 +1,52 @@
 <view class="container">
-  <view class="title">用户管理</view>
+  <view class="tabs">
+    <picker mode="selector" range="{{roleOptions}}" range-key="label" bindchange="switchRole">
+      <view class="filter-btn">{{currentRoleLabel}}</view>
+    </picker>
+  </view>
+
+  <scroll-view scroll-y class="user-list" bindscrolltolower="loadMore">
+    <block wx:for="{{users}}" wx:key="openid">
+      <view class="user-item">
+        <view class="user-info">
+          <text class="user-name">{{item.nickname || '未知用户'}}</text>
+          <view class="user-tags">
+            <text class="user-role role-{{item.role}}">{{roleText[item.role]}}</text>
+            <text wx:if="{{item.assigned_admin}}" class="user-assigned">已分配</text>
+          </view>
+        </view>
+        <view class="user-actions">
+          <button class="btn-small" bindtap="showAssignModal" data-user="{{item}}">分配</button>
+        </view>
+      </view>
+    </block>
+    <view wx:if="{{users.length === 0 && !loading}}" class="empty">
+      <text>暂无用户</text>
+    </view>
+    <view wx:if="{{hasMore && users.length > 0}}" class="load-more" bindtap="loadMore">
+      <text>加载更多</text>
+    </view>
+  </scroll-view>
+
+  <view class="modal" wx:if="{{showAssignModal}}">
+    <view class="modal-mask" bindtap="hideAssignModal"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">分配角色</text>
+      </view>
+      <view class="modal-body">
+        <text class="assign-user">用户: {{selectedUser ? selectedUser.nickname : ''}}</text>
+        <view class="role-btns">
+          <button wx:for="{{assignRoleOptions}}" wx:key="value" 
+            class="role-btn {{selectedRole === item.value ? 'active' : ''}}" 
+            data-role="{{item.value}}" data-label="{{item.label}}"
+            bindtap="selectRole">{{item.label}}</button>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="btn" bindtap="hideAssignModal">取消</button>
+        <button class="btn btn-primary" bindtap="submitAssign">确定</button>
+      </view>
+    </view>
+  </view>
 </view>

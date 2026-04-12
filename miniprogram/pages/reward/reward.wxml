@@ -10,8 +10,11 @@
       <block wx:for="{{rewards}}" wx:key="id">
         <view class="item">
           <text class="item-desc">{{item.description}}</text>
-          <text class="item-status status-{{item.status}}">{{item.status}}</text>
-          <text wx:if="{{item.points}}" class="item-points">+{{item.points}}积分</text>
+          <view class="item-footer">
+            <text class="item-status status-{{item.status}}">{{statusText[item.status]}}</text>
+            <text wx:if="{{item.status === 'approved' && item.points}}" class="item-points">+{{item.points}}积分</text>
+            <text wx:if="{{item.status === 'rejected' && item.admin_note}}" class="item-reason">拒绝原因: {{item.admin_note}}</text>
+          </view>
         </view>
       </block>
       <view wx:if="{{rewards.length === 0}}" class="empty">

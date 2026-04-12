@@ -106,7 +106,7 @@ Page({
             url: '/pages/auth/auth?first=1',
           });
         } else {
-          wx.switchTab({
+          wx.reLaunch({
             url: '/pages/home/home',
           });
         }
@@ -169,7 +169,7 @@ Page({
           icon: 'success',
         });
         setTimeout(() => {
-          wx.switchTab({
+          wx.reLaunch({
             url: '/pages/home/home',
           });
         }, 1500);

@@ -49,10 +49,10 @@ async function getApplication(type, id) {
   try {
     if (type === 'reward') {
       const applications = await db.collection('reward_applications').doc(id).get();
-      if (applications.data.length === 0) {
+      if (!applications.data) {
         return { ok: false, error: '申请不存在' };
       }
-      const application = applications.data[0];
+      const application = applications.data;
       const users = await db.collection('users').where({
         openid: application.user_id,
       }).get();
@@ -62,10 +62,10 @@ async function getApplication(type, id) {
       return { ok: true, application };
     } else if (type === 'redemption') {
       const applications = await db.collection('redemption_applications').doc(id).get();
-      if (applications.data.length === 0) {
+      if (!applications.data) {
         return { ok: false, error: '申请不存在' };
       }
-      const application = applications.data[0];
+      const application = applications.data;
       const users = await db.collection('users').where({
         openid: application.user_id,
       }).get();
@@ -73,8 +73,8 @@ async function getApplication(type, id) {
         application.user = users.data[0];
       }
       const prizes = await db.collection('prizes').doc(application.prize_id).get();
-      if (prizes.data.length > 0) {
-        application.prize = prizes.data[0];
+      if (prizes.data) {
+        application.prize = prizes.data;
       }
       return { ok: true, application };
     }
@@ -97,10 +97,10 @@ async function quickApprove(type, id, note) {
   try {
     if (type === 'reward') {
       const applications = await db.collection('reward_applications').doc(id).get();
-      if (applications.data.length === 0) {
+      if (!applications.data) {
         return { ok: false, error: '申请不存在' };
       }
-      const application = applications.data[0];
+      const application = applications.data;
       if (application.status !== 'pending') {
         return { ok: false, error: '申请已被处理' };
       }
@@ -122,10 +122,10 @@ async function quickApprove(type, id, note) {
       return { ok: true };
     } else if (type === 'redemption') {
       const applications = await db.collection('redemption_applications').doc(id).get();
-      if (applications.data.length === 0) {
+      if (!applications.data) {
         return { ok: false, error: '申请不存在' };
       }
-      const application = applications.data[0];
+      const application = applications.data;
       if (application.status !== 'pending') {
         return { ok: false, error: '申请已被处理' };
       }

@@ -3,6 +3,11 @@ Page({
     description: '',
     rewards: [],
     loading: false,
+    statusText: {
+      pending: '待审核',
+      approved: '已通过',
+      rejected: '已拒绝',
+    },
   },
 
   onLoad() {

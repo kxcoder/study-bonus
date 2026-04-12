@@ -46,13 +46,15 @@ async function submitRedemption(openid, data) {
     const user = users.data[0];
 
     const prizes = await db.collection('prizes').doc(data.prize_id).get();
-    if (prizes.data.length === 0) {
+    if (!prizes.data) {
       return { ok: false, error: '奖品不存在' };
     }
 
-    const prize = prizes.data[0];
+    const prize = prizes.data;
 
-    if (user.points_balance < prize.points_cost) {
+    const frozenBalance = user.frozen_balance || 0;
+    const availableBalance = user.points_balance - frozenBalance;
+    if (availableBalance < prize.points_cost) {
       return { ok: false, error: '积分不足' };
     }
 
@@ -64,10 +66,20 @@ async function submitRedemption(openid, data) {
       data: {
         user_id: openid,
         prize_id: data.prize_id,
+        prize_name: prize.name,
+        points_cost: prize.points_cost,
         status: 'pending',
         admin_note: '',
         created_at: db.serverDate(),
         reviewed_at: null,
+      },
+    });
+
+    await db.collection('users').where({
+      openid: openid,
+    }).update({
+      data: {
+        frozen_balance: _.inc(prize.points_cost),
       },
     });
 
@@ -85,8 +97,8 @@ async function listRedemptions(openid) {
 
     for (let redemption of redemptions.data) {
       const prizes = await db.collection('prizes').doc(redemption.prize_id).get();
-      if (prizes.data.length > 0) {
-        redemption.prize = prizes.data[0];
+      if (prizes.data) {
+        redemption.prize = prizes.data;
       }
     }
 
@@ -192,8 +204,8 @@ async function listHistoryRedemptions(data, openid) {
       }
 
       const prizes = await db.collection('prizes').doc(redemption.prize_id).get();
-      if (prizes.data.length > 0) {
-        redemption.prize = prizes.data[0];
+      if (prizes.data) {
+        redemption.prize = prizes.data;
       }
     }
 
@@ -217,12 +229,7 @@ async function approveRedemption(id, note) {
       return { ok: false, error: '申请已被处理' };
     }
 
-    const prizes = await db.collection('prizes').doc(redemption.prize_id).get();
-    if (!prizes.data) {
-      return { ok: false, error: '奖品不存在' };
-    }
-
-    const prize = prizes.data[0];
+    const pointsCost = redemption.points_cost || 0;
     const users = await db.collection('users').where({
       openid: redemption.user_id,
     }).get();
@@ -232,9 +239,10 @@ async function approveRedemption(id, note) {
     }
 
     const user = users.data[0];
+    const frozenBalance = user.frozen_balance || 0;
 
-    if (user.points_balance < prize.points_cost) {
-      return { ok: false, error: '用户积分不足' };
+    if (frozenBalance < pointsCost) {
+      return { ok: false, error: '冻结积分不足' };
     }
 
     await db.collection('redemption_applications').doc(id).update({
@@ -249,7 +257,8 @@ async function approveRedemption(id, note) {
       openid: redemption.user_id,
     }).update({
       data: {
-        points_balance: _.inc(-prize.points_cost),
+        points_balance: _.inc(-pointsCost),
+        frozen_balance: _.inc(-pointsCost),
       },
     });
 
@@ -279,6 +288,8 @@ async function rejectRedemption(id, note) {
       return { ok: false, error: '申请已被处理' };
     }
 
+    const pointsCost = redemption.points_cost || 0;
+
     await db.collection('redemption_applications').doc(id).update({
       data: {
         status: 'rejected',
@@ -286,6 +297,16 @@ async function rejectRedemption(id, note) {
         reviewed_at: db.serverDate(),
       },
     });
+
+    if (pointsCost > 0) {
+      await db.collection('users').where({
+        openid: redemption.user_id,
+      }).update({
+        data: {
+          frozen_balance: _.inc(-pointsCost),
+        },
+      });
+    }
 
     return { ok: true };
   } catch (err) {

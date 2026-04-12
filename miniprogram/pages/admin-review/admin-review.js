@@ -19,6 +19,11 @@ Page({
     pageSize: 20,
     hasMore: false,
     loading: false,
+    showPointsModal: false,
+    currentItem: null,
+    pointsInput: '',
+    showRejectModal: false,
+    rejectInput: '',
   },
 
   onLoad() {
@@ -129,22 +134,49 @@ Page({
   },
 
   approve(item) {
-    wx.showModal({
-      title: '批准奖励',
-      content: '请输入奖励积分',
-      editable: true,
-      placeholderText: '输入积分',
-      success: (res) => {
-        if (res.confirm) {
-          const points = parseInt(res.content, 10) || 10;
-          if (points > 0) {
-            this.doApprove(item, points);
-          } else {
-            wx.showToast({ title: '请输入有效积分', icon: 'none' });
+    if (this.data.activeType === 'redemption') {
+      wx.showModal({
+        title: '确认批准',
+        content: `确认批准该兑换申请？\n将扣除用户 ${item.points_cost || 0} 积分`,
+        success: (res) => {
+          if (res.confirm) {
+            this.doApprove(item);
           }
-        }
-      },
+        },
+      });
+    } else {
+      this.setData({
+        showPointsModal: true,
+        currentItem: item,
+        pointsInput: '',
+      });
+    }
+  },
+
+  hidePointsModal() {
+    this.setData({
+      showPointsModal: false,
+      currentItem: null,
+      pointsInput: '',
     });
+  },
+
+  bindPointsInput(e) {
+    this.setData({ pointsInput: e.detail.value });
+  },
+
+  confirmPoints() {
+    const input = this.data.pointsInput;
+    if (!input || input.trim() === '') {
+      wx.showToast({ title: '请输入积分', icon: 'none' });
+      return;
+    }
+    const points = parseInt(input, 10);
+    if (isNaN(points) || points <= 0) {
+      wx.showToast({ title: '请输入有效的数字积分', icon: 'none' });
+      return;
+    }
+    this.doApprove(this.data.currentItem, points);
   },
 
   doApprove(item, points) {
@@ -181,11 +213,11 @@ Page({
       wx.hideLoading();
       if (res.result && res.result.ok) {
         wx.showToast({ title: '已批准', icon: 'success' });
-        this.setData({ page: 1, records: [] });
+        this.setData({ page: 1, records: [], showPointsModal: false, currentItem: null, pointsInput: '' });
         this.loadRecords();
       } else {
         console.log('approve error:', res.result);
-        wx.showToast({ title: res.result?.error || '操作失败', icon: 'none' });
+        wx.showToast({ title: (res.result && res.result.error) || '操作失败', icon: 'none' });
       }
     }).catch((err) => {
       console.log('approve catch:', err);
@@ -195,16 +227,27 @@ Page({
   },
 
   reject(item) {
-    wx.showModal({
-      title: '拒绝',
-      content: '请输入拒绝原因',
-      editable: true,
-      success: (res) => {
-        if (res.confirm) {
-          this.doReject(item, res.content);
-        }
-      },
+    this.setData({
+      showRejectModal: true,
+      currentItem: item,
+      rejectInput: '就是不通过',
     });
+  },
+
+  hideRejectModal() {
+    this.setData({
+      showRejectModal: false,
+      rejectInput: '',
+    });
+  },
+
+  bindRejectInput(e) {
+    this.setData({ rejectInput: e.detail.value });
+  },
+
+  confirmReject() {
+    const note = this.data.rejectInput || '就是不通过';
+    this.doReject(this.data.currentItem, note);
   },
 
   doReject(item, note) {
@@ -222,7 +265,7 @@ Page({
       wx.hideLoading();
       if (res.result && res.result.ok) {
         wx.showToast({ title: '已拒绝', icon: 'success' });
-        this.setData({ page: 1, records: [] });
+        this.setData({ page: 1, records: [], showRejectModal: false, currentItem: null, rejectInput: '' });
         this.loadRecords();
       } else {
         wx.showToast({ title: '操作失败', icon: 'none' });

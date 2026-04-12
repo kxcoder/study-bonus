@@ -1,16 +1,52 @@
 Page({
   data: {
     prizes: [],
+    history: [],
     loading: false,
     userPoints: 0,
+    frozenPoints: 0,
+    currentTab: 'prizes',
+    statusText: {
+      pending: '待审核',
+      approved: '已通过',
+      rejected: '已拒绝',
+    },
   },
 
   onLoad() {
-    const app = getApp();
-    this.setData({
-      userPoints: app.globalData.userInfo?.points_balance || 0,
-    });
+    this.loadUserInfo();
     this.loadPrizes();
+  },
+
+  onShow() {
+    if (this.data.currentTab === 'history') {
+      this.loadHistory();
+    }
+  },
+
+  loadUserInfo() {
+    wx.cloud.callFunction({
+      name: 'auth',
+      data: { action: 'get-user', data: {} },
+    }).then((res) => {
+      if (res.result && res.result.ok) {
+        const userInfo = res.result.user;
+        this.setData({
+          userPoints: userInfo.points_balance || 0,
+          frozenPoints: userInfo.frozen_balance || 0,
+        });
+        const app = getApp();
+        app.globalData.userInfo = userInfo;
+      }
+    });
+  },
+
+  switchTab(e) {
+    const tab = e.currentTarget.dataset.tab;
+    this.setData({ currentTab: tab });
+    if (tab === 'history') {
+      this.loadHistory();
+    }
   },
 
   loadPrizes() {
@@ -31,12 +67,26 @@ Page({
     });
   },
 
+  loadHistory() {
+    wx.cloud.callFunction({
+      name: 'redemption',
+      data: {
+        action: 'list',
+      },
+    }).then((res) => {
+      if (res.result && res.result.ok) {
+        this.setData({ history: res.result.redemptions || [] });
+      }
+    });
+  },
+
   redeem(e) {
     const prize = e.currentTarget.dataset.prize;
+    const availablePoints = this.data.userPoints - this.data.frozenPoints;
 
-    if (this.data.userPoints < prize.points_cost) {
+    if (availablePoints < prize.points_cost) {
       wx.showToast({
-        title: '积分不足',
+        title: '可用积分不足',
         icon: 'none',
       });
       return;
@@ -52,7 +102,7 @@ Page({
 
     wx.showModal({
       title: '确认兑换',
-      content: `确认用${prize.points_cost}积分兑换${prize.name}？`,
+      content: `确认用${prize.points_cost}积分兑换${prize.name}？\n积分将暂时冻结，等待审核。`,
       success: (res) => {
         if (res.confirm) {
           this.doRedeem(prize._id);
@@ -76,12 +126,18 @@ Page({
       wx.hideLoading();
       if (res.result && res.result.ok) {
         wx.showToast({
-          title: '提交成功',
+          title: '兑换申请已提交',
           icon: 'success',
         });
+        this.loadUserInfo();
+        this.loadPrizes();
+        this.setData({ currentTab: 'history' });
+        setTimeout(() => {
+          this.loadHistory();
+        }, 500);
       } else {
         wx.showToast({
-          title: res.result.error || '提交失败',
+          title: res.result && res.result.error || '提交失败',
           icon: 'none',
         });
       }
@@ -95,7 +151,11 @@ Page({
   },
 
   onPullDownRefresh() {
+    this.loadUserInfo();
     this.loadPrizes();
+    if (this.data.currentTab === 'history') {
+      this.loadHistory();
+    }
     wx.stopPullDownRefresh();
   },
 });

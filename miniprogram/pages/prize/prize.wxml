@@ -1,11 +1,25 @@
 <view class="container">
   <view class="header">
-    <text>可用积分：{{userPoints}}</text>
+    <view class="points-info">
+      <view class="points-item">
+        <text class="points-label">可用积分</text>
+        <text class="points-value">{{userPoints - frozenPoints}}</text>
+      </view>
+      <view class="points-item frozen">
+        <text class="points-label">冻结中</text>
+        <text class="points-value">{{frozenPoints}}</text>
+      </view>
+    </view>
   </view>
 
-  <scroll-view scroll-y class="prize-list">
+  <view class="tabs">
+    <view class="tab {{currentTab === 'prizes' ? 'active' : ''}}" bindtap="switchTab" data-tab="prizes">兑换奖品</view>
+    <view class="tab {{currentTab === 'history' ? 'active' : ''}}" bindtap="switchTab" data-tab="history">兑换记录</view>
+  </view>
+
+  <scroll-view wx:if="{{currentTab === 'prizes'}}" scroll-y class="prize-list">
     <block wx:for="{{prizes}}" wx:key="id">
-      <view class="prize-item">
+      <view class="prize-item {{item.inventory <= 0 ? 'inactive' : ''}}">
         <image wx:if="{{item.image}}" class="prize-image" src="{{item.image}}" mode="aspectFill"></image>
         <view class="prize-info">
           <text class="prize-name">{{item.name}}</text>
@@ -14,11 +28,32 @@
             <text class="prize-inventory">库存: {{item.inventory}}</text>
           </view>
         </view>
-        <button class="redeem-btn" size="mini" bindtap="redeem" data-prize="{{item}}">兑换</button>
+        <button class="redeem-btn" size="mini" bindtap="redeem" data-prize="{{item}}" disabled="{{item.inventory <= 0 || userPoints - frozenPoints < item.points_cost}}">兑换</button>
       </view>
     </block>
     <view wx:if="{{prizes.length === 0}}" class="empty">
       <text>暂无奖品</text>
+    </view>
+  </scroll-view>
+
+  <scroll-view wx:if="{{currentTab === 'history'}}" scroll-y class="history-list">
+    <block wx:for="{{history}}" wx:key="id">
+      <view class="history-item">
+        <view class="history-header">
+          <text class="history-name">{{item.prize_name || item.prize.name}}</text>
+          <text class="history-points">{{item.points_cost}}积分</text>
+        </view>
+        <view class="history-status">
+          <text class="status-text {{item.status}}">{{statusText[item.status]}}</text>
+          <text class="history-date">{{item.created_at}}</text>
+        </view>
+        <view wx:if="{{item.status === 'rejected' && item.admin_note}}" class="history-reason">
+          <text class="item-reason">拒绝原因: {{item.admin_note}}</text>
+        </view>
+      </view>
+    </block>
+    <view wx:if="{{history.length === 0}}" class="empty">
+      <text>暂无兑换记录</text>
     </view>
   </scroll-view>
 </view>
