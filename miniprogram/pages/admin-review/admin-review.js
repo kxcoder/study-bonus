@@ -61,6 +61,16 @@ Page({
     if (this.data.loading) return;
     this.setData({ loading: true });
 
+    if (this.data.activeStatus === 'all' && this.data.activeType === 'reward') {
+      this.loadAllRecords();
+      return;
+    }
+
+    if (!this.data.activeType) {
+      this.setData({ loading: false });
+      return;
+    }
+
     const action = this.data.activeType === 'reward' ? 'reward' : 'redemption';
     const listAction = this.data.activeStatus === 'pending' ? 'list-pending' : 'list-history';
 
@@ -110,9 +120,53 @@ Page({
     }
   },
 
+  loadAllRecords() {
+    const pageSize = this.data.pageSize;
+    const page = this.data.page;
+
+    Promise.all([
+      wx.cloud.callFunction({
+        name: 'reward',
+        data: { action: 'list-history', data: { status: undefined, page: page, pageSize: pageSize } },
+      }),
+      wx.cloud.callFunction({
+        name: 'redemption',
+        data: { action: 'list-history', data: { status: undefined, page: page, pageSize: pageSize } },
+      }),
+    ]).then(([rewardRes, redemptionRes]) => {
+      console.log('loadAllRecords rewardRes:', rewardRes);
+      console.log('loadAllRecords redemptionRes:', redemptionRes);
+
+      const rewards = (rewardRes.result ? (rewardRes.result.rewards || []) : []).map(item => ({ ...item, recordType: 'reward' }));
+      const redemptions = (redemptionRes.result ? (redemptionRes.result.redemptions || []) : []).map(item => ({ ...item, recordType: 'redemption' }));
+
+      const combined = [...rewards, ...redemptions].sort((a, b) => {
+        const dateA = a.created_at ? new Date(a.created_at) : new Date(0);
+        const dateB = b.created_at ? new Date(b.created_at) : new Date(0);
+        return dateB - dateA;
+      });
+
+      const newRecords = this.data.page === 1
+        ? combined
+        : [...this.data.records, ...combined];
+
+      const total = (rewardRes.result?.total || 0) + (redemptionRes.result?.total || 0);
+
+      this.setData({
+        records: newRecords,
+        hasMore: newRecords.length < total,
+        loading: false,
+      });
+    }).catch((err) => {
+      console.log('loadAllRecords error:', err);
+      this.setData({ loading: false });
+    });
+  },
+
   loadMore() {
     if (!this.data.hasMore || this.data.loading) return;
     if (this.data.activeStatus === 'pending') return;
+    if (this.data.activeStatus === 'all' && this.data.activeType === 'reward') return;
     this.setData({ page: this.data.page + 1 });
     this.loadRecords();
   },
@@ -134,7 +188,8 @@ Page({
   },
 
   approve(item) {
-    if (this.data.activeType === 'redemption') {
+    const itemType = item.recordType || this.data.activeType;
+    if (itemType === 'redemption') {
       wx.showModal({
         title: '确认批准',
         content: `确认批准该兑换申请？\n将扣除用户 ${item.points_cost || 0} 积分`,
@@ -180,7 +235,8 @@ Page({
   },
 
   doApprove(item, points) {
-    const action = this.data.activeType === 'reward' ? 'reward' : 'redemption';
+    const itemType = item.recordType || this.data.activeType;
+    const action = itemType;
     
     console.log('doApprove item keys:', Object.keys(item));
     console.log('doApprove item._id:', item._id);
@@ -197,7 +253,7 @@ Page({
 
     console.log('doApprove payload:', payload);
 
-    if (this.data.activeType === 'reward') {
+    if (itemType === 'reward') {
       payload.points = points;
     }
 
@@ -251,7 +307,8 @@ Page({
   },
 
   doReject(item, note) {
-    const action = this.data.activeType === 'reward' ? 'reward' : 'redemption';
+    const itemType = item.recordType || this.data.activeType;
+    const action = itemType;
 
     wx.showLoading({ title: '处理中...' });
 

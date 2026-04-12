@@ -16,10 +16,11 @@
       <block wx:for="{{records}}" wx:key="id">
         <view class="item" bindtap="showActionSheet" data-item="{{item}}" data-id="{{item._id || item.id}}">
           <view class="item-header">
+            <text wx:if="{{item.recordType}}" class="item-type">[{{item.recordType === 'reward' ? '奖励' : '兑换'}}]</text>
             <text class="item-user">{{item.user ? item.user.nickname : '未知用户'}}</text>
             <text class="item-status status-{{item.status}}">{{statusMap[item.status]}}</text>
           </view>
-          <text class="item-desc">{{item.description}}</text>
+          <text class="item-desc">{{item.description || item.prize_name}}</text>
           <view class="item-footer">
             <text class="item-date">{{item.created_at}}</text>
             <text wx:if="{{item.status === 'approved' && item.points}}" class="item-points">+{{item.points}}积分</text>
@@ -33,6 +34,7 @@
       <block wx:for="{{records}}" wx:key="id">
         <view class="item" bindtap="showActionSheet" data-item="{{item}}" data-id="{{item._id || item.id}}">
           <view class="item-header">
+            <text wx:if="{{item.recordType}}" class="item-type">[{{item.recordType === 'reward' ? '奖励' : '兑换'}}]</text>
             <text class="item-user">{{item.user ? item.user.nickname : '未知用户'}}</text>
             <text class="item-status status-{{item.status}}">{{statusMap[item.status]}}</text>
           </view>
