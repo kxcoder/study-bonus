@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80">
+  <!-- Prize Active - 选中态 -->
+  <g transform="translate(0, 0)">
+    <!-- 奖杯杯身 -->
+    <path d="M25,20 L55,20 L50,50 L30,50 Z" fill="#FF6B6B"/>
+    <!-- 奖杯底座 -->
+    <rect x="30" y="50" width="20" height="8" fill="#FF6B6B"/>
+    <!-- 奖杯手柄 -->
+    <path d="M25,25 Q20,30 25,40" fill="none" stroke="#FF6B6B" stroke-width="4"/>
+    <path d="M55,25 Q60,30 55,40" fill="none" stroke="#FF6B6B" stroke-width="4"/>
+    <!-- 星星装饰 -->
+    <polygon points="40,12 42,16 46,16 43,19 44,24 40,21 36,24 37,19 34,16 38,16" fill="#FFD700"/>
+  </g>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80">
+  <!-- Home Active - 选中态(红色) -->
+  <g transform="translate(0, 0)">
+    <!-- 屋顶 -->
+    <polygon points="40,10 15,35 65,35" fill="#FF6B6B"/>
+    <!-- 墙体 -->
+    <rect x="22" y="35" width="36" height="30" fill="#FF6B6B"/>
+    <!-- 门 -->
+    <rect x="35" y="45" width="10" height="20" fill="#FFFFFF"/>
+    <!-- 星星 -->
+    <polygon points="55,20 57,25 62,25 58,28 60,33 55,30 50,33 52,28 48,25 53,25" fill="#FFD700"/>
+  </g>
+</svg>
