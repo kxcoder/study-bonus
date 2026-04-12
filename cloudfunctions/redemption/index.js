@@ -8,21 +8,26 @@ const db = cloud.database();
 const _ = db.command;
 
 exports.main = async (event, context) => {
+  console.log('redemption event:', JSON.stringify(event));
   const { action, data } = event;
   const wxContext = cloud.getWXContext();
   const openid = wxContext.OPENID;
+  
+  const eventData = data || event;
 
   switch (action) {
     case 'submit':
-      return await submitRedemption(openid, data);
+      return await submitRedemption(openid, eventData);
     case 'list':
       return await listRedemptions(openid);
     case 'list-pending':
-      return await listPendingRedemptions();
+      return await listPendingRedemptions(openid);
+    case 'list-history':
+      return await listHistoryRedemptions(eventData, openid);
     case 'approve':
-      return await approveRedemption(data.id, data.note);
+      return await approveRedemption(eventData.id, eventData.note);
     case 'reject':
-      return await rejectRedemption(data.id, data.note);
+      return await rejectRedemption(eventData.id, eventData.note);
     default:
       return { ok: false, error: 'Unknown action' };
   }
@@ -91,11 +96,92 @@ async function listRedemptions(openid) {
   }
 }
 
-async function listPendingRedemptions() {
+async function listPendingRedemptions(openid) {
   try {
-    const redemptions = await db.collection('redemption_applications').where({
-      status: 'pending',
-    }).orderBy('created_at', 'asc').get();
+    let query = { status: 'pending' };
+    
+    if (openid) {
+      const currentUser = await db.collection('users').where({ openid: openid }).get();
+      
+      if (currentUser.data.length > 0 && currentUser.data[0].role === 'admin') {
+        const assignedUsers = await db.collection('users').where({ assigned_admin: openid }).get();
+        const userIds = assignedUsers.data.map(u => u.openid);
+        
+        if (userIds.length === 0) {
+          return { ok: true, redemptions: [] };
+        }
+        
+        const redemptions = await db.collection('redemption_applications')
+          .where(_.or(userIds.map(uid => ({ user_id: uid, status: 'pending' }))))
+          .orderBy('created_at', 'asc')
+          .get();
+          
+        for (let redemption of redemptions.data) {
+          const users = await db.collection('users').where({ openid: redemption.user_id }).get();
+          if (users.data.length > 0) {
+            redemption.user = users.data[0];
+          }
+          const prizes = await db.collection('prizes').doc(redemption.prize_id).get();
+          if (prizes.data) {
+            redemption.prize = prizes.data;
+          }
+        }
+        return { ok: true, redemptions: redemptions.data };
+      }
+    }
+
+    const redemptions = await db.collection('redemption_applications').where(query).orderBy('created_at', 'asc').get();
+
+    for (let redemption of redemptions.data) {
+      const users = await db.collection('users').where({ openid: redemption.user_id }).get();
+      if (users.data.length > 0) {
+        redemption.user = users.data[0];
+      }
+      const prizes = await db.collection('prizes').doc(redemption.prize_id).get();
+      if (prizes.data) {
+        redemption.prize = prizes.data;
+      }
+    }
+
+    return { ok: true, redemptions: redemptions.data };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
+async function listHistoryRedemptions(data, openid) {
+  try {
+    let query = {};
+    if (data.status && data.status !== 'all') {
+      query.status = data.status;
+    }
+
+    if (openid) {
+      const currentUser = await db.collection('users').where({ openid: openid }).get();
+      
+      if (currentUser.data.length > 0 && currentUser.data[0].role === 'admin') {
+        const assignedUsers = await db.collection('users').where({ assigned_admin: openid }).get();
+        const userIds = assignedUsers.data.map(u => u.openid);
+        
+        if (userIds.length > 0) {
+          query.user_id = db.command.in(userIds);
+        } else {
+          return { ok: true, redemptions: [], total: 0 };
+        }
+      }
+    }
+
+    const pageSize = data.pageSize || 20;
+    const page = data.page || 1;
+    const skip = (page - 1) * pageSize;
+
+    const countResult = await db.collection('redemption_applications').where(query).count();
+    const redemptions = await db.collection('redemption_applications')
+      .where(query)
+      .orderBy('created_at', 'desc')
+      .skip(skip)
+      .limit(pageSize)
+      .get();
 
     for (let redemption of redemptions.data) {
       const users = await db.collection('users').where({
@@ -111,7 +197,7 @@ async function listPendingRedemptions() {
       }
     }
 
-    return { ok: true, redemptions: redemptions.data };
+    return { ok: true, redemptions: redemptions.data, total: countResult.total };
   } catch (err) {
     return { ok: false, error: err.message };
   }
@@ -121,18 +207,18 @@ async function approveRedemption(id, note) {
   try {
     const redemptions = await db.collection('redemption_applications').doc(id).get();
 
-    if (!redemptions.data[0]) {
+    if (!redemptions.data) {
       return { ok: false, error: '申请不存在' };
     }
 
-    const redemption = redemptions.data[0];
+    const redemption = redemptions.data;
 
-    if (redemption.status !== 'pending') {
+    if (!redemption || redemption.status !== 'pending') {
       return { ok: false, error: '申请已被处理' };
     }
 
     const prizes = await db.collection('prizes').doc(redemption.prize_id).get();
-    if (prizes.data.length === 0) {
+    if (!prizes.data) {
       return { ok: false, error: '奖品不存在' };
     }
 
@@ -183,13 +269,13 @@ async function rejectRedemption(id, note) {
   try {
     const redemptions = await db.collection('redemption_applications').doc(id).get();
 
-    if (!redemptions.data[0]) {
+    if (!redemptions.data) {
       return { ok: false, error: '申请不存在' };
     }
 
-    const redemption = redemptions.data[0];
+    const redemption = redemptions.data;
 
-    if (redemption.status !== 'pending') {
+    if (!redemption || redemption.status !== 'pending') {
       return { ok: false, error: '申请已被处理' };
     }
 

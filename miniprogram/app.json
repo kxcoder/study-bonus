@@ -4,7 +4,10 @@
     "pages/auth/auth",
     "pages/reward/reward",
     "pages/prize/prize",
-    "pages/admin/admin"
+    "pages/admin/admin",
+    "pages/admin-review/admin-review",
+    "pages/admin-prize/admin-prize",
+    "pages/admin-user/admin-user"
   ],
   "window": {
     "backgroundTextStyle": "light",

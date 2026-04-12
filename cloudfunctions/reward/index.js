@@ -8,21 +8,28 @@ const db = cloud.database();
 const _ = db.command;
 
 exports.main = async (event, context) => {
+  console.log('reward event:', JSON.stringify(event));
   const { action, data } = event;
   const wxContext = cloud.getWXContext();
   const openid = wxContext.OPENID;
+  
+  console.log('action:', action, 'data:', data);
+  const eventData = data || event;
+  console.log('eventData:', eventData);
 
   switch (action) {
     case 'submit':
-      return await submitReward(openid, data);
+      return await submitReward(openid, eventData);
     case 'list':
       return await listRewards(openid);
     case 'list-pending':
-      return await listPendingRewards();
+      return await listPendingRewards(openid);
+    case 'list-history':
+      return await listHistoryRewards(eventData, openid);
     case 'approve':
-      return await approveReward(data.id, data.points, data.note);
+      return await approveReward(eventData.id, eventData.points, eventData.note);
     case 'reject':
-      return await rejectReward(data.id, data.note);
+      return await rejectReward(eventData.id, eventData.note);
     default:
       return { ok: false, error: 'Unknown action' };
   }
@@ -64,16 +71,44 @@ async function listRewards(openid) {
   }
 }
 
-async function listPendingRewards() {
+async function listPendingRewards(openid) {
   try {
-    const rewards = await db.collection('reward_applications').where({
-      status: 'pending',
-    }).orderBy('created_at', 'asc').get();
+    let query = { status: 'pending' };
+    
+    if (openid) {
+      const currentUser = await db.collection('users').where({ openid: openid }).get();
+      
+      if (currentUser.data.length > 0) {
+        const role = currentUser.data[0].role;
+        
+        if (role === 'admin') {
+          const assignedUsers = await db.collection('users').where({ assigned_admin: openid }).get();
+          const userIds = assignedUsers.data.map(u => u.openid);
+          
+          if (userIds.length === 0) {
+            return { ok: true, rewards: [] };
+          }
+          
+          const rewards = await db.collection('reward_applications')
+            .where(_.or(userIds.map(uid => ({ user_id: uid, status: 'pending' }))))
+            .orderBy('created_at', 'asc')
+            .get();
+            
+          for (let reward of rewards.data) {
+            const users = await db.collection('users').where({ openid: reward.user_id }).get();
+            if (users.data.length > 0) {
+              reward.user = users.data[0];
+            }
+          }
+          return { ok: true, rewards: rewards.data };
+        }
+      }
+    }
+
+    const rewards = await db.collection('reward_applications').where(query).orderBy('created_at', 'asc').get();
 
     for (let reward of rewards.data) {
-      const users = await db.collection('users').where({
-        openid: reward.user_id,
-      }).get();
+      const users = await db.collection('users').where({ openid: reward.user_id }).get();
       if (users.data.length > 0) {
         reward.user = users.data[0];
       }
@@ -85,17 +120,69 @@ async function listPendingRewards() {
   }
 }
 
+async function listHistoryRewards(data, openid) {
+  try {
+    let query = {};
+    if (data.status && data.status !== 'all') {
+      query.status = data.status;
+    }
+
+    if (openid) {
+      const currentUser = await db.collection('users').where({ openid: openid }).get();
+      
+      if (currentUser.data.length > 0 && currentUser.data[0].role === 'admin') {
+        const assignedUsers = await db.collection('users').where({ assigned_admin: openid }).get();
+        const userIds = assignedUsers.data.map(u => u.openid);
+        
+        if (userIds.length > 0) {
+          query.user_id = db.command.in(userIds);
+        } else {
+          return { ok: true, rewards: [], total: 0 };
+        }
+      }
+    }
+
+    const pageSize = data.pageSize || 20;
+    const page = data.page || 1;
+    const skip = (page - 1) * pageSize;
+
+    const countResult = await db.collection('reward_applications').where(query).count();
+    const rewards = await db.collection('reward_applications')
+      .where(query)
+      .orderBy('created_at', 'desc')
+      .skip(skip)
+      .limit(pageSize)
+      .get();
+
+    for (let reward of rewards.data) {
+      const users = await db.collection('users').where({
+        openid: reward.user_id,
+      }).get();
+      if (users.data.length > 0) {
+        reward.user = users.data[0];
+      }
+    }
+
+    return { ok: true, rewards: rewards.data, total: countResult.total };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
 async function approveReward(id, points, note) {
   try {
+    console.log('approveReward:', id, points, note);
     const rewards = await db.collection('reward_applications').doc(id).get();
+    console.log('rewards:', rewards);
 
-    if (!rewards.data[0]) {
+    if (!rewards.data) {
       return { ok: false, error: '申请不存在' };
     }
 
-    const reward = rewards.data[0];
+    const reward = rewards.data;
+    console.log('reward status:', reward.status);
 
-    if (reward.status !== 'pending') {
+    if (!reward || reward.status !== 'pending') {
       return { ok: false, error: '申请已被处理' };
     }
 
@@ -126,13 +213,13 @@ async function rejectReward(id, note) {
   try {
     const rewards = await db.collection('reward_applications').doc(id).get();
 
-    if (!rewards.data[0]) {
+    if (!rewards.data) {
       return { ok: false, error: '申请不存在' };
     }
 
-    const reward = rewards.data[0];
+    const reward = rewards.data;
 
-    if (reward.status !== 'pending') {
+    if (!reward || reward.status !== 'pending') {
       return { ok: false, error: '申请已被处理' };
     }
 

@@ -61,12 +61,10 @@ Page({
 
     wx.cloud.callFunction({
       name: 'reward',
-      data: {
-        action: 'list',
-      },
+      data: { action: 'list', data: {} },
     }).then((res) => {
       this.setData({
-        rewards: res.result.rewards || [],
+        rewards: res.result ? (res.result.rewards || []) : [],
         loading: false,
       });
     }).catch(() => {

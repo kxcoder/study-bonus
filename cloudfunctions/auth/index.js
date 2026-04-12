@@ -34,6 +34,16 @@ exports.main = async (event, context) => {
       return await checkFirstLogin(openid);
     case 'create-admin':
       return await handleCreateAdmin(openid, data);
+    case 'update-user':
+      return await updateUser(openid, data);
+    case 'list-users':
+      return await listUsers(openid, data);
+    case 'update-user-role':
+      return await updateUserRole(openid, data);
+    case 'assign-user':
+      return await assignUser(openid, data);
+    case 'get-admins':
+      return await getAdmins(openid, data);
     default:
       return { ok: false, error: 'Unknown action' };
   }
@@ -217,6 +227,125 @@ async function handleCreateAdmin(openid, data) {
     });
 
     return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
+async function updateUser(openid, data) {
+  try {
+    const updateData = {};
+    if (data.nickname) updateData.nickname = data.nickname;
+
+    if (Object.keys(updateData).length === 0) {
+      return { ok: false, error: '没有要更新的内容' };
+    }
+
+    await db.collection('users').where({ openid: openid }).update({
+      data: updateData,
+    });
+
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
+async function listUsers(openid, data) {
+  try {
+    const currentUser = await db.collection('users').where({ openid: openid }).get();
+    if (currentUser.data.length === 0 || currentUser.data[0].role !== 'super_admin') {
+      return { ok: false, error: '权限不足' };
+    }
+
+    const query = {};
+    if (data.role && data.role !== 'all') {
+      query.role = data.role;
+    }
+
+    const pageSize = data.pageSize || 50;
+    const page = data.page || 1;
+    const skip = (page - 1) * pageSize;
+
+    const countResult = await db.collection('users').where(query).count();
+    const users = await db.collection('users')
+      .where(query)
+      .orderBy('created_at', 'desc')
+      .skip(skip)
+      .limit(pageSize)
+      .get();
+
+    return { ok: true, users: users.data, total: countResult.total };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
+async function updateUserRole(openid, data) {
+  try {
+    const currentUser = await db.collection('users').where({ openid: openid }).get();
+    if (currentUser.data.length === 0 || currentUser.data[0].role !== 'super_admin') {
+      return { ok: false, error: '权限不足' };
+    }
+
+    if (!data.target_openid || !data.role) {
+      return { ok: false, error: '缺少参数' };
+    }
+
+    const updateData = { role: data.role };
+    await db.collection('users').where({ openid: data.target_openid }).update({
+      data: updateData,
+    });
+
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
+async function assignUser(openid, data) {
+  try {
+    const currentUser = await db.collection('users').where({ openid: openid }).get();
+    if (currentUser.data.length === 0 || currentUser.data[0].role !== 'super_admin') {
+      return { ok: false, error: '权限不足' };
+    }
+
+    if (!data.target_openid || !data.assigned_admin) {
+      return { ok: false, error: '缺少参数' };
+    }
+
+    const updateData = { assigned_admin: data.assigned_admin };
+    
+    const targetUser = await db.collection('users').where({ openid: data.target_openid }).get();
+    if (targetUser.data.length > 0) {
+      updateData.assigned_at = db.serverDate();
+    }
+
+    await db.collection('users').where({ openid: data.target_openid }).update({
+      data: updateData,
+    });
+
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+}
+
+async function getAdmins(openid, data) {
+  try {
+    const currentUser = await db.collection('users').where({ openid: openid }).get();
+    if (currentUser.data.length === 0 || currentUser.data[0].role !== 'super_admin') {
+      return { ok: false, error: '权限不足' };
+    }
+
+    const admins = await db.collection('users').where(
+      db.command.or([
+        { role: 'admin' },
+        { role: 'super_admin' }
+      ])
+    ).get();
+
+    return { ok: true, admins: admins.data };
   } catch (err) {
     return { ok: false, error: err.message };
   }

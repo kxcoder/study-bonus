@@ -1,0 +1,81 @@
+<view class="container">
+  <view class="toolbar">
+    <button class="btn-primary" bindtap="showAddForm">添加奖品</button>
+  </view>
+
+  <scroll-view scroll-y class="prize-list">
+    <block wx:for="{{prizes}}" wx:key="_id">
+      <view class="prize-item {{item.is_active ? '' : 'inactive'}}">
+        <view wx:if="{{item.image}}" class="prize-img-box">
+          <image class="prize-img" src="{{item.image}}" mode="aspectFill" bindtap="previewImage" data-src="{{item.image}}"></image>
+        </view>
+        <view class="prize-content">
+          <view class="prize-header">
+            <text class="prize-name">{{item.name}}</text>
+            <text class="prize-status {{item.is_active ? 'active' : 'inactive'}}">
+              {{item.is_active ? '启用' : '禁用'}}
+            </text>
+          </view>
+          <view class="prize-footer">
+            <text class="prize-points">{{item.points_cost}}积分</text>
+            <view class="inventory-control">
+              <text class="inventory-label">库存:</text>
+              <input class="inventory-input" type="number" value="{{item.inventory}}"
+                bindblur="updateInventory" data-id="{{item._id}}" data-inventory="{{item.inventory}}" />
+            </view>
+          </view>
+        </view>
+        <view class="prize-actions">
+          <button class="btn-small" bindtap="showEditForm" data-prize="{{item}}">编辑</button>
+          <button class="btn-small {{item.is_active ? 'btn-warning' : 'btn-success'}}"
+            bindtap="toggleStatus" data-prize="{{item}}">
+            {{item.is_active ? '禁用' : '启用'}}
+          </button>
+          <button class="btn-small btn-danger" bindtap="deletePrize" data-prize="{{item}}">删除</button>
+        </view>
+      </view>
+    </block>
+    <view wx:if="{{prizes.length === 0}}" class="empty">
+      <text>暂无奖品</text>
+    </view>
+  </scroll-view>
+
+  <view class="modal" wx:if="{{showForm}}">
+    <view class="modal-mask" bindtap="hideForm"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">{{editingPrize ? '编辑奖品' : '添加奖品'}}</text>
+      </view>
+      <view class="modal-body">
+        <view class="form-item">
+          <text class="form-label">奖品图片</text>
+          <view class="image-upload" bindtap="chooseImage">
+            <image wx:if="{{formData.image}}" class="upload-preview" src="{{formData.image}}" mode="aspectFill"></image>
+            <view wx:else class="upload-placeholder">
+              <text class="plus">+</text>
+            </view>
+          </view>
+        </view>
+        <view class="form-item">
+          <text class="form-label">名称</text>
+          <input class="form-input" placeholder="请输入奖品名称" value="{{formData.name}}"
+            bindinput="bindFormInput" data-field="name" />
+        </view>
+        <view class="form-item">
+          <text class="form-label">积分价格</text>
+          <input class="form-input" type="number" placeholder="请输入积分价格" value="{{formData.points_cost}}"
+            bindinput="bindFormInput" data-field="points_cost" />
+        </view>
+        <view class="form-item">
+          <text class="form-label">库存</text>
+          <input class="form-input" type="number" placeholder="请输入库存数量" value="{{formData.inventory}}"
+            bindinput="bindFormInput" data-field="inventory" />
+        </view>
+      </view>
+      <view class="modal-footer">
+        <button class="btn" bindtap="hideForm">取消</button>
+        <button class="btn btn-primary" bindtap="submitForm" disabled="{{submitting}}">{{submitting ? '处理中...' : '确定'}}</button>
+      </view>
+    </view>
+  </view>
+</view>

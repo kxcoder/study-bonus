@@ -193,11 +193,13 @@ page {
 .prize-name {
   font-size: 32rpx;
   font-weight: bold;
+  margin-bottom: 8rpx;
 }
 
-.prize-desc {
-  color: #666;
-  font-size: 24rpx;
+.prize-info .prize-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .prize-footer {
@@ -260,4 +262,550 @@ page {
 .tab.active {
   border-bottom-color: #1890ff;
   color: #1890ff;
+}
+
+.entry-list {
+  padding: 20rpx;
+}
+
+.entry-item {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  padding: 30rpx;
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.entry-icon {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 24rpx;
+}
+
+.review-icon {
+  background: linear-gradient(135deg, #1890ff, #36aaff);
+}
+
+.prize-icon {
+  background: linear-gradient(135deg, #52c41a, #73d13d);
+}
+
+.user-icon {
+  background: linear-gradient(135deg, #722ed1, #9254de);
+}
+
+.user-icon {
+  background: linear-gradient(135deg, #722ed1, #9254de);
+}
+
+.icon-text {
+  font-size: 40rpx;
+  color: #fff;
+  font-weight: bold;
+}
+
+.entry-info {
+  flex: 1;
+}
+
+.entry-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+}
+
+.entry-desc {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 8rpx;
+  display: block;
+}
+
+.entry-arrow {
+  font-size: 32rpx;
+  color: #ccc;
+}
+
+.tab-group {
+  display: flex;
+  flex: 1;
+}
+
+.filter-btn {
+  padding: 10rpx 20rpx;
+  background: #f0f0f0;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  margin-left: 20rpx;
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10rpx;
+}
+
+.item-user {
+  font-weight: bold;
+}
+
+.item-footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 10rpx;
+}
+
+.item-date {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.item-points {
+  color: #52c41a;
+  font-weight: bold;
+  margin-left: 20rpx;
+}
+
+.item-note {
+  font-size: 24rpx;
+  color: #ff4d4f;
+  margin-left: 20rpx;
+}
+
+.load-more {
+  text-align: center;
+  padding: 20rpx;
+  color: #1890ff;
+}
+
+.toolbar {
+  padding: 20rpx;
+}
+
+.btn-primary {
+  background: #1890ff;
+  color: #fff;
+}
+
+.prize-item {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  margin: 10rpx 20rpx;
+  padding: 20rpx;
+  border-radius: 12rpx;
+}
+
+.prize-item.inactive {
+  opacity: 0.6;
+  background: #f5f5f5;
+}
+
+.prize-content {
+  flex: 1;
+}
+
+.prize-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.prize-status {
+  font-size: 24rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 4rpx;
+}
+
+.prize-status.active {
+  background: #f6ffed;
+  color: #52c41a;
+}
+
+.prize-status.inactive {
+  background: #fff1f0;
+  color: #ff4d4f;
+}
+
+.prize-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16rpx;
+}
+
+.inventory-control {
+  display: flex;
+  align-items: center;
+}
+
+.inventory-label {
+  font-size: 24rpx;
+  color: #666;
+  margin-right: 10rpx;
+}
+
+.inventory-input {
+  width: 120rpx;
+  height: 56rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 8rpx;
+  text-align: center;
+  font-size: 28rpx;
+  padding: 0 10rpx;
+}
+
+.prize-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.btn-small {
+  font-size: 24rpx;
+  padding: 8rpx 20rpx;
+  margin-left: 16rpx;
+}
+
+.btn-warning {
+  background: #faad14;
+  color: #fff;
+}
+
+.btn-success {
+  background: #52c41a;
+  color: #fff;
+}
+
+.btn-danger {
+  background: #ff4d4f;
+  color: #fff;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+}
+
+.modal-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 30rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  text-align: center;
+}
+
+.modal-title {
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.modal-body {
+  padding: 30rpx;
+  max-height: 600rpx;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  display: flex;
+  padding: 20rpx 30rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.modal-footer .btn {
+  flex: 1;
+  margin: 0 10rpx;
+}
+
+.form-item {
+  margin-bottom: 24rpx;
+}
+
+.form-label {
+  display: block;
+  font-size: 28rpx;
+  margin-bottom: 10rpx;
+}
+
+.form-input {
+  width: 100%;
+  height: 72rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 8rpx;
+  padding: 0 20rpx;
+  box-sizing: border-box;
+}
+
+.form-textarea {
+  width: 100%;
+  height: 160rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  box-sizing: border-box;
+}
+
+.prize-img {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 8rpx;
+  background: #f5f5f5;
+  margin-bottom: 16rpx;
+}
+
+.prize-img-box {
+  margin-bottom: 16rpx;
+}
+
+.prize-item {
+  display: flex;
+  flex-direction: column;
+  padding: 20rpx;
+  background: #fff;
+  margin: 10rpx 20rpx;
+  border-radius: 12rpx;
+}
+
+.prize-item.inactive {
+  opacity: 0.6;
+  background: #f5f5f5;
+}
+
+.prize-content {
+  flex: 1;
+}
+
+.prize-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10rpx;
+}
+
+.prize-name {
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.prize-status {
+  font-size: 24rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 4rpx;
+}
+
+.prize-status.active {
+  background: #f6ffed;
+  color: #52c41a;
+}
+
+.prize-status.inactive {
+  background: #fff1f0;
+  color: #ff4d4f;
+}
+
+.prize-desc {
+  color: #666;
+  font-size: 28rpx;
+  margin-bottom: 16rpx;
+}
+
+.prize-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.prize-points {
+  color: #ff4d4f;
+  font-weight: bold;
+  font-size: 32rpx;
+}
+
+.inventory-control {
+  display: flex;
+  align-items: center;
+}
+
+.inventory-label {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.inventory-input {
+  width: 120rpx;
+  height: 56rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 8rpx;
+  text-align: center;
+  font-size: 28rpx;
+  margin-left: 8rpx;
+}
+
+.prize-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.btn-small {
+  font-size: 24rpx;
+  padding: 8rpx 20rpx;
+  margin-left: 16rpx;
+}
+
+.image-upload {
+  width: 200rpx;
+  height: 200rpx;
+  border: 2rpx dashed #ddd;
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.upload-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #999;
+  font-size: 24rpx;
+}
+
+.upload-placeholder text:first-child {
+  font-size: 60rpx;
+  line-height: 1;
+}
+
+.form-hint {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 8rpx;
+}
+
+.compress-canvas {
+  position: fixed;
+  top: -9999rpx;
+  left: -9999rpx;
+}
+
+.edit-nickname {
+  font-size: 24rpx;
+  color: #1890ff;
+  margin-left: 16rpx;
+}
+
+.header .nickname {
+  display: flex;
+  align-items: center;
+}
+
+.user-list {
+  height: calc(100vh - 100rpx);
+}
+
+.user-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  background: #fff;
+  margin: 10rpx 20rpx;
+  border-radius: 8rpx;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-nickname {
+  font-size: 32rpx;
+  font-weight: bold;
+  display: block;
+}
+
+.user-role {
+  font-size: 24rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 4rpx;
+  margin-left: 10rpx;
+}
+
+.role-child {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.role-admin {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.role-super_admin {
+  background: #fff1f0;
+  color: #ff4d4f;
+}
+
+.user-assigned {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 8rpx;
+  display: block;
+}
+
+.user-actions {
+  display: flex;
+}
+
+.picker-btn {
+  padding: 20rpx;
+  background: #f0f0f0;
+  border-radius: 8rpx;
+  text-align: center;
 }

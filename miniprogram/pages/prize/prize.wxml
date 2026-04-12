@@ -9,7 +9,6 @@
         <image wx:if="{{item.image}}" class="prize-image" src="{{item.image}}" mode="aspectFill"></image>
         <view class="prize-info">
           <text class="prize-name">{{item.name}}</text>
-          <text class="prize-desc">{{item.description}}</text>
           <view class="prize-footer">
             <text class="prize-points">{{item.points_cost}}积分</text>
             <text class="prize-inventory">库存: {{item.inventory}}</text>

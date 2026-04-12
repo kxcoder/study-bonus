@@ -11,7 +11,7 @@
         <view class="item">
           <text class="item-desc">{{item.description}}</text>
           <text class="item-status status-{{item.status}}">{{item.status}}</text>
-          <text wx:if="{{item.points}}" class="item-points">+{{item.points}}</text>
+          <text wx:if="{{item.points}}" class="item-points">+{{item.points}}积分</text>
         </view>
       </block>
       <view wx:if="{{rewards.length === 0}}" class="empty">

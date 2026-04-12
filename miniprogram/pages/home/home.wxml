@@ -2,25 +2,76 @@
   <view class="header">
     <image class="avatar" src="/images/avatar.png" mode="aspectFill"></image>
     <text class="nickname">{{userInfo.nickname}}</text>
+    <text class="edit-nickname" bindtap="editNickname">编辑</text>
   </view>
 
-  <view class="points-card">
-    <text class="label">我的积分</text>
-    <text class="points">{{pointsBalance}}</text>
-  </view>
+  <view wx:if="{{isAdmin}}">
+    <view class="entry-list">
+      <view class="entry-item" bindtap="goToReview">
+        <view class="entry-icon review-icon">
+          <text class="icon-text">审</text>
+        </view>
+        <view class="entry-info">
+          <text class="entry-title">审核管理</text>
+          <text class="entry-desc">查看待审核/已审核记录</text>
+        </view>
+        <view class="entry-arrow">></view>
+      </view>
 
-  <view class="actions">
-    <view class="action-btn" bindtap="goToReward">
-      <image class="action-icon" src="/images/reward.png"></image>
-      <text>记录奖励</text>
+      <view class="entry-item" bindtap="goToPrize">
+        <view class="entry-icon prize-icon">
+          <text class="icon-text">奖</text>
+        </view>
+        <view class="entry-info">
+          <text class="entry-title">奖品管理</text>
+          <text class="entry-desc">配置奖品和库存</text>
+        </view>
+        <view class="entry-arrow">></view>
+      </view>
+
+      <view class="entry-item" bindtap="goToUserManagement" wx:if="{{userInfo.role === 'super_admin'}}">
+        <view class="entry-icon user-icon">
+          <text class="icon-text">用</text>
+        </view>
+        <view class="entry-info">
+          <text class="entry-title">用户管理</text>
+        </view>
+        <view class="entry-arrow">></view>
+      </view>
     </view>
-    <view class="action-btn" bindtap="goToPrize">
-      <image class="action-icon" src="/images/prize.png"></image>
-      <text>兑换奖品</text>
+  </view>
+
+  <view wx:else>
+    <view class="points-card">
+      <text class="label">我的积分</text>
+      <text class="points">{{pointsBalance}}</text>
+    </view>
+
+    <view class="actions">
+      <view class="action-btn" bindtap="goToReward">
+        <image class="action-icon" src="/images/reward.png"></image>
+        <text>记录奖励</text>
+      </view>
+      <view class="action-btn" bindtap="goToPrize">
+        <image class="action-icon" src="/images/prize.png"></image>
+        <text>兑换奖品</text>
+      </view>
     </view>
   </view>
 
-  <view class="admin-btn" wx:if="{{isAdmin}}" bindtap="goToAdmin">
-    <text>管理后台</text>
+  <view class="modal" wx:if="{{showNicknameModal}}">
+    <view class="modal-mask" bindtap="hideNicknameModal"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">修改昵称</text>
+      </view>
+      <view class="modal-body">
+        <input class="form-input" placeholder="请输入昵称" value="{{nicknameInput}}" bindinput="inputNickname" />
+      </view>
+      <view class="modal-footer">
+        <button class="btn" bindtap="hideNicknameModal">取消</button>
+        <button class="btn btn-primary" bindtap="saveNickname" disabled="{{saving}}">{{saving ? '保存中...' : '确定'}}</button>
+      </view>
+    </view>
   </view>
 </view>

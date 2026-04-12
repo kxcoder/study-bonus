@@ -1,0 +1,56 @@
+<view class="container">
+  <view class="tabs">
+    <view class="tab-group">
+      <view class="tab {{activeType === 'reward' ? 'active' : ''}}" data-type="reward" bindtap="switchType">奖励</view>
+      <view class="tab {{activeType === 'redemption' ? 'active' : ''}}" data-type="redemption" bindtap="switchType">兑换</view>
+    </view>
+    <view class="filter-group">
+      <picker mode="selector" range="{{statusOptions}}" range-key="label" bindchange="switchStatus">
+        <view class="filter-btn">{{currentStatusLabel}}</view>
+      </picker>
+    </view>
+  </view>
+
+  <scroll-view scroll-y class="list" bindscrolltolower="loadMore">
+    <block wx:if="{{activeType === 'reward'}}">
+      <block wx:for="{{records}}" wx:key="id">
+        <view class="item" bindtap="showActionSheet" data-item="{{item}}" data-id="{{item._id || item.id}}">
+          <view class="item-header">
+            <text class="item-user">{{item.user ? item.user.nickname : '未知用户'}}</text>
+            <text class="item-status status-{{item.status}}">{{statusMap[item.status]}}</text>
+          </view>
+          <text class="item-desc">{{item.description}}</text>
+          <view class="item-footer">
+            <text class="item-date">{{item.created_at}}</text>
+            <text wx:if="{{item.status === 'approved'}}" class="item-points">+{{item.points}}积分</text>
+            <text wx:if="{{item.admin_note}}" class="item-note">备注: {{item.admin_note}}</text>
+          </view>
+        </view>
+      </block>
+    </block>
+
+    <block wx:if="{{activeType === 'redemption'}}">
+      <block wx:for="{{records}}" wx:key="id">
+        <view class="item" bindtap="showActionSheet" data-item="{{item}}" data-id="{{item._id || item.id}}">
+          <view class="item-header">
+            <text class="item-user">{{item.user ? item.user.nickname : '未知用户'}}</text>
+            <text class="item-status status-{{item.status}}">{{statusMap[item.status]}}</text>
+          </view>
+          <text class="item-desc">{{item.prize ? item.prize.name : '未知奖品'}}</text>
+          <view class="item-footer">
+            <text class="item-date">{{item.created_at}}</text>
+            <text wx:if="{{item.admin_note}}" class="item-note">备注: {{item.admin_note}}</text>
+          </view>
+        </view>
+      </block>
+    </block>
+
+    <view wx:if="{{records.length === 0}}" class="empty">
+      <text>暂无记录</text>
+    </view>
+
+    <view wx:if="{{hasMore && records.length > 0}}" class="load-more" bindtap="loadMore">
+      <text>加载更多</text>
+    </view>
+  </scroll-view>
+</view>
