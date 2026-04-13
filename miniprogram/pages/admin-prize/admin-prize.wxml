@@ -7,7 +7,7 @@
     <block wx:for="{{prizes}}" wx:key="_id">
       <view class="prize-item {{item.is_active ? '' : 'inactive'}}">
         <view wx:if="{{item.image}}" class="prize-img-box">
-          <image class="prize-img" src="{{item.image}}" mode="aspectFill" bindtap="previewImage" data-src="{{item.image}}"></image>
+          <image class="prize-img" src="{{item.image}}" mode="aspectFit"></image>
         </view>
         <view class="prize-content">
           <view class="prize-header">
@@ -49,11 +49,12 @@
       <view class="modal-body">
         <view class="form-item">
           <text class="form-label">奖品图片</text>
-          <view class="image-upload" bindtap="chooseImage">
-            <image wx:if="{{formData.image}}" class="upload-preview" src="{{formData.image}}" mode="aspectFill"></image>
-            <view wx:else class="upload-placeholder">
-              <text class="plus">+</text>
-            </view>
+          <view class="image-select">
+            <block wx:for="{{imageOptions}}" wx:key="id">
+              <view class="image-option {{formData.image === item.src ? 'selected' : ''}}" bindtap="selectImage" data-src="{{item.src}}">
+                <image class="option-img" src="{{item.src}}" mode="aspectFit"></image>
+              </view>
+            </block>
           </view>
         </view>
         <view class="form-item">

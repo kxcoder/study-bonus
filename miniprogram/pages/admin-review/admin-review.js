@@ -61,11 +61,6 @@ Page({
     if (this.data.loading) return;
     this.setData({ loading: true });
 
-    if (this.data.activeStatus === 'all' && this.data.activeType === 'reward') {
-      this.loadAllRecords();
-      return;
-    }
-
     if (!this.data.activeType) {
       this.setData({ loading: false });
       return;
@@ -118,49 +113,6 @@ Page({
         this.setData({ loading: false });
       });
     }
-  },
-
-  loadAllRecords() {
-    const pageSize = this.data.pageSize;
-    const page = this.data.page;
-
-    Promise.all([
-      wx.cloud.callFunction({
-        name: 'reward',
-        data: { action: 'list-history', data: { status: undefined, page: page, pageSize: pageSize } },
-      }),
-      wx.cloud.callFunction({
-        name: 'redemption',
-        data: { action: 'list-history', data: { status: undefined, page: page, pageSize: pageSize } },
-      }),
-    ]).then(([rewardRes, redemptionRes]) => {
-      console.log('loadAllRecords rewardRes:', rewardRes);
-      console.log('loadAllRecords redemptionRes:', redemptionRes);
-
-      const rewards = (rewardRes.result ? (rewardRes.result.rewards || []) : []).map(item => ({ ...item, recordType: 'reward' }));
-      const redemptions = (redemptionRes.result ? (redemptionRes.result.redemptions || []) : []).map(item => ({ ...item, recordType: 'redemption' }));
-
-      const combined = [...rewards, ...redemptions].sort((a, b) => {
-        const dateA = a.created_at ? new Date(a.created_at) : new Date(0);
-        const dateB = b.created_at ? new Date(b.created_at) : new Date(0);
-        return dateB - dateA;
-      });
-
-      const newRecords = this.data.page === 1
-        ? combined
-        : [...this.data.records, ...combined];
-
-      const total = (rewardRes.result?.total || 0) + (redemptionRes.result?.total || 0);
-
-      this.setData({
-        records: newRecords,
-        hasMore: newRecords.length < total,
-        loading: false,
-      });
-    }).catch((err) => {
-      console.log('loadAllRecords error:', err);
-      this.setData({ loading: false });
-    });
   },
 
   loadMore() {

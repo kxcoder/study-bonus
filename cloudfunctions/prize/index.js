@@ -37,8 +37,9 @@ async function listPrizes(data) {
   try {
     let query = { is_active: true };
 
-    const prizes = await db.collection('prizes').where(query).get();
+    const prizes = await db.collection('prizes').where(query).orderBy('points_cost', 'asc').get();
 
+    console.log('listPrizes result:', JSON.stringify(prizes.data));
     return { ok: true, prizes: prizes.data };
   } catch (err) {
     return { ok: false, error: err.message };
@@ -124,6 +125,7 @@ async function listAllPrizes(data) {
       .limit(pageSize)
       .get();
 
+    console.log('listAllPrizes result:', JSON.stringify(prizes.data));
     return { ok: true, prizes: prizes.data, total: countResult.total };
   } catch (err) {
     return { ok: false, error: err.message };

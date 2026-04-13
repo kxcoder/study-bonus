@@ -1,4 +1,5 @@
 const cloud = require('wx-server-sdk');
+const axios = require('axios');
 
 cloud.init({
   env: cloud.DYNAMIC_CURRENT_ENV,
@@ -6,6 +7,19 @@ cloud.init({
 
 const db = cloud.database();
 const _ = db.command;
+
+const WEBHOOK_URL = 'https://im-dichat.xiaojikeji.com/api/hooks/incoming/bc831879-3e68-4c11-8e3d-2c8f654b80b6';
+
+async function sendNotification(message) {
+  try {
+    await axios.post(WEBHOOK_URL, {
+      text: message,
+    });
+    console.log('notification sent:', message);
+  } catch (err) {
+    console.error('notification fail:', err.message);
+  }
+}
 
 exports.main = async (event, context) => {
   console.log('redemption event:', JSON.stringify(event));
@@ -82,6 +96,8 @@ async function submitRedemption(openid, data) {
         frozen_balance: _.inc(prize.points_cost),
       },
     });
+
+    await sendNotification('你好新的兑换申请需要处理. @kurtiske');
 
     return { ok: true, id: result._id };
   } catch (err) {

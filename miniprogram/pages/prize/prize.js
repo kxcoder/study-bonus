@@ -58,13 +58,55 @@ Page({
         action: 'list',
       },
     }).then((res) => {
-      this.setData({
-        prizes: res.result.prizes || [],
-        loading: false,
-      });
+      const prizes = res.result.prizes || [];
+      return this.processPrizesForDisplay(prizes);
+    }).then(prizes => {
+      this.setData({ prizes: prizes, loading: false });
     }).catch(() => {
       this.setData({ loading: false });
     });
+  },
+
+  saveBase64ToTempFile(base64Data, prefix) {
+    return new Promise((resolve, reject) => {
+      if (!base64Data || !base64Data.startsWith('data:')) {
+        reject(new Error('invalid base64'));
+        return;
+      }
+      
+      const fs = wx.getFileSystemManager();
+      const tempFilePath = `${wx.env.USER_DATA_PATH}/${prefix || 'img'}_${Date.now()}.jpg`;
+      
+      const base64 = base64Data.replace(/^data:image\/\w+;base64,/, '');
+      const buffer = wx.base64ToArrayBuffer(base64);
+      
+      fs.writeFile({
+        filePath: tempFilePath,
+        data: buffer,
+        encoding: 'binary',
+        success: () => resolve(tempFilePath),
+        fail: () => reject(new Error('write fail')),
+      });
+    });
+  },
+
+  processPrizesForDisplay(prizes) {
+    const promises = prizes.map((prize, index) => {
+      if (prize.image && prize.image.startsWith('data:')) {
+        return this.saveBase64ToTempFile(prize.image, `prize_${index}`).then(tempPath => {
+          prize.imageUrl = tempPath;
+          return prize;
+        }).catch(() => {
+          prize.imageUrl = '';
+          return prize;
+        });
+      } else {
+        prize.imageUrl = prize.image || '';
+        return Promise.resolve(prize);
+      }
+    });
+    
+    return Promise.all(promises);
   },
 
   loadHistory() {

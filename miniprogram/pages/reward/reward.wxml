@@ -1,10 +1,10 @@
 <view class="container">
-  <view class="section">
+  <view class="section input-section">
     <textarea class="description" placeholder="描述你的成就..." bindinput="inputDescription" value="{{description}}"></textarea>
     <button class="btn" bindtap="submitReward">提交申请</button>
   </view>
 
-  <view class="section">
+  <view class="section record-section">
     <text class="section-title">申请记录</text>
     <scroll-view scroll-y class="list">
       <block wx:for="{{rewards}}" wx:key="id">

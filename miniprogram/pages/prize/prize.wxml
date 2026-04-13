@@ -20,7 +20,9 @@
   <scroll-view wx:if="{{currentTab === 'prizes'}}" scroll-y class="prize-list">
     <block wx:for="{{prizes}}" wx:key="id">
       <view class="prize-item {{item.inventory <= 0 ? 'inactive' : ''}}">
-        <image wx:if="{{item.image}}" class="prize-image" src="{{item.image}}" mode="aspectFill"></image>
+        <view wx:if="{{item.image}}" class="prize-img-box">
+          <image class="prize-img" src="{{item.image}}" mode="aspectFit"></image>
+        </view>
         <view class="prize-info">
           <text class="prize-name">{{item.name}}</text>
           <view class="prize-footer">

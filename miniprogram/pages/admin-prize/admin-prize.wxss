@@ -1,1 +1,45 @@
 /* pages/admin-prize/admin-prize.wxss */
+
+.image-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+}
+
+.image-option {
+  width: 120rpx;
+  height: 120rpx;
+  border: 2rpx solid #ddd;
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.image-option.selected {
+  border-color: #07c160;
+  background: #e8f5e9;
+}
+
+.option-img {
+  width: 100rpx;
+  height: 100rpx;
+}
+
+.prize-img-box {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 8rpx;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.prize-img {
+  width: 100rpx;
+  height: 100rpx;
+}
