@@ -6,8 +6,8 @@
   <scroll-view scroll-y class="prize-list">
     <block wx:for="{{prizes}}" wx:key="_id">
       <view class="prize-item {{item.is_active ? '' : 'inactive'}}">
-        <view wx:if="{{item.image}}" class="prize-img-box">
-          <image class="prize-img" src="{{item.image}}" mode="aspectFit"></image>
+        <view wx:if="{{item.imageUrl}}" class="prize-img-box">
+          <image class="prize-img" src="{{item.imageUrl}}" mode="aspectFit"></image>
         </view>
         <view class="prize-content">
           <view class="prize-header">
@@ -49,12 +49,15 @@
       <view class="modal-body">
         <view class="form-item">
           <text class="form-label">奖品图片</text>
-          <view class="image-select">
-            <block wx:for="{{imageOptions}}" wx:key="id">
-              <view class="image-option {{formData.image === item.src ? 'selected' : ''}}" bindtap="selectImage" data-src="{{item.src}}">
-                <image class="option-img" src="{{item.src}}" mode="aspectFit"></image>
-              </view>
-            </block>
+          <view class="image-upload">
+            <view wx:if="{{formData.imageUrl}}" class="preview-box">
+              <image class="preview-img" src="{{formData.imageUrl}}" mode="aspectFit"></image>
+              <view class="preview-remove" bindtap="removeImage">×</view>
+            </view>
+            <view wx:else class="upload-btn" bindtap="chooseImage">
+              <text class="upload-icon">+</text>
+              <text class="upload-text">上传图片</text>
+            </view>
           </view>
         </view>
         <view class="form-item">

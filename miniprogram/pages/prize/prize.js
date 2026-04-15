@@ -67,34 +67,11 @@ Page({
     });
   },
 
-  saveBase64ToTempFile(base64Data, prefix) {
-    return new Promise((resolve, reject) => {
-      if (!base64Data || !base64Data.startsWith('data:')) {
-        reject(new Error('invalid base64'));
-        return;
-      }
-      
-      const fs = wx.getFileSystemManager();
-      const tempFilePath = `${wx.env.USER_DATA_PATH}/${prefix || 'img'}_${Date.now()}.jpg`;
-      
-      const base64 = base64Data.replace(/^data:image\/\w+;base64,/, '');
-      const buffer = wx.base64ToArrayBuffer(base64);
-      
-      fs.writeFile({
-        filePath: tempFilePath,
-        data: buffer,
-        encoding: 'binary',
-        success: () => resolve(tempFilePath),
-        fail: () => reject(new Error('write fail')),
-      });
-    });
-  },
-
   processPrizesForDisplay(prizes) {
-    const promises = prizes.map((prize, index) => {
-      if (prize.image && prize.image.startsWith('data:')) {
-        return this.saveBase64ToTempFile(prize.image, `prize_${index}`).then(tempPath => {
-          prize.imageUrl = tempPath;
+    const promises = prizes.map((prize) => {
+      if (prize.image && prize.image.startsWith('cloud://')) {
+        return this.getTempFileURL(prize.image).then(url => {
+          prize.imageUrl = url;
           return prize;
         }).catch(() => {
           prize.imageUrl = '';
@@ -105,8 +82,23 @@ Page({
         return Promise.resolve(prize);
       }
     });
-    
     return Promise.all(promises);
+  },
+
+  getTempFileURL(fileID) {
+    return new Promise((resolve, reject) => {
+      wx.cloud.getTempFileURL({
+        fileList: [fileID],
+        success: (res) => {
+          if (res.fileList && res.fileList[0] && res.fileList[0].tempFileURL) {
+            resolve(res.fileList[0].tempFileURL);
+          } else {
+            reject(new Error('no URL'));
+          }
+        },
+        fail: reject,
+      });
+    });
   },
 
   loadHistory() {

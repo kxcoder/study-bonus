@@ -9,14 +9,6 @@ Page({
       inventory: 0,
       image: '',
     },
-    imageOptions: [
-      { id: 'book', name: '书籍', src: '/images/prize/book.png' },
-      { id: 'candy', name: '糖果', src: '/images/prize/candy.jpeg' },
-      { id: 'chocolate', name: '巧克力', src: '/images/prize/chocolate.png' },
-      { id: 'snack', name: '零食', src: '/images/prize/snack.png' },
-      { id: 'toy', name: '玩具', src: '/images/prize/toy.png' },
-      { id: 'tv', name: '电视', src: '/images/prize/tv.png' },
-    ],
     submitting: false,
     loading: false,
   },
@@ -169,92 +161,43 @@ Page({
 
   uploadImage(filePath) {
     wx.showLoading({ title: '上传中...' });
-    const fs = wx.getFileSystemManager();
-    console.log('uploadImage called, filePath:', filePath);
+    const cloudPath = `prizes/${Date.now()}.jpg`;
     
-    fs.getFileInfo({
+    wx.cloud.uploadFile({
+      cloudPath: cloudPath,
       filePath: filePath,
       success: (res) => {
-        const sizeKB = res.size / 1024;
-        console.log('final compressed image size:', sizeKB.toFixed(2), 'KB');
-      },
-      fail: (err) => {
-        console.error('getFileInfo fail:', err);
-      },
-    });
-    
-    fs.readFile({
-      filePath: filePath,
-      encoding: 'base64',
-      success: (res) => {
-        const base64Data = res.data;
-        console.log('readFile success, base64 length:', base64Data ? base64Data.length : 0);
-        console.log('base64 prefix:', base64Data ? base64Data.substring(0, 50) : 'empty');
+        console.log('uploadFile success, fileID:', res.fileID);
+        this.setData({ 'formData.image': res.fileID });
         
-        const fullBase64 = 'data:image/jpeg;base64,' + base64Data;
-        this.setData({ 'formData.image': fullBase64 });
-        
-        this.saveBase64ToTempFile(fullBase64, 'preview').then(tempPath => {
-          console.log('saveBase64ToTempFile success, tempPath:', tempPath);
-          this.setData({ 'formData.imageUrl': tempPath });
-          wx.hideLoading();
-        }).catch(err => {
-          console.error('saveBase64ToTempFile fail:', err);
-          wx.hideLoading();
+        wx.cloud.getTempFileURL({
+          fileList: [res.fileID],
+          success: (urlRes) => {
+            if (urlRes.fileList && urlRes.fileList[0] && urlRes.fileList[0].tempFileURL) {
+              this.setData({ 'formData.imageUrl': urlRes.fileList[0].tempFileURL });
+            }
+            wx.hideLoading();
+          },
+          fail: () => {
+            wx.hideLoading();
+          },
         });
       },
       fail: (err) => {
-        console.error('readFile fail:', err);
-        wx.showToast({ title: '读取图片失败', icon: 'none' });
+        console.error('uploadFile fail:', err);
+        wx.showToast({ title: '上传失败', icon: 'none' });
         wx.hideLoading();
       },
     });
   },
 
-  saveBase64ToTempFile(base64Data, prefix) {
-    return new Promise((resolve, reject) => {
-      console.log('saveBase64ToTempFile called, base64Data starts:', base64Data ? base64Data.substring(0, 30) : 'empty');
-      
-      if (!base64Data || !base64Data.startsWith('data:')) {
-        console.error('invalid base64, does not start with data:');
-        reject(new Error('invalid base64'));
-        return;
-      }
-      
-      const fs = wx.getFileSystemManager();
-      const tempFilePath = `${wx.env.USER_DATA_PATH}/${prefix || 'img'}_${Date.now()}.jpg`;
-      console.log('tempFilePath:', tempFilePath);
-      
-      const base64 = base64Data.replace(/^data:image\/\w+;base64,/, '');
-      const buffer = wx.base64ToArrayBuffer(base64);
-      console.log('buffer length:', buffer.byteLength);
-      
-      fs.writeFile({
-        filePath: tempFilePath,
-        data: buffer,
-        encoding: 'binary',
-        success: () => {
-          console.log('writeFile success');
-          resolve(tempFilePath);
-        },
-        fail: (err) => {
-          console.error('writeFile fail:', err);
-          reject(new Error('write fail'));
-        },
-      });
-    });
-  },
+  
 
   processPrizesForDisplay(prizes) {
-    console.log('processPrizesForDisplay called, count:', prizes.length);
-    const promises = prizes.map((prize, index) => {
-      const hasImage = !!prize.image;
-      const isBase64 = prize.image && prize.image.startsWith('data:');
-      console.log(`prize[${index}] ${prize.name}: hasImage=${hasImage}, isBase64=${isBase64}`);
-      
-      if (prize.image && prize.image.startsWith('data:')) {
-        return this.saveBase64ToTempFile(prize.image, `prize_${index}`).then(tempPath => {
-          prize.imageUrl = tempPath;
+    const promises = prizes.map((prize) => {
+      if (prize.image && prize.image.startsWith('cloud://')) {
+        return this.getTempFileURL(prize.image).then(url => {
+          prize.imageUrl = url;
           return prize;
         }).catch(() => {
           prize.imageUrl = '';
@@ -265,8 +208,23 @@ Page({
         return Promise.resolve(prize);
       }
     });
-    
     return Promise.all(promises);
+  },
+
+  getTempFileURL(fileID) {
+    return new Promise((resolve, reject) => {
+      wx.cloud.getTempFileURL({
+        fileList: [fileID],
+        success: (res) => {
+          if (res.fileList && res.fileList[0] && res.fileList[0].tempFileURL) {
+            resolve(res.fileList[0].tempFileURL);
+          } else {
+            reject(new Error('no URL'));
+          }
+        },
+        fail: reject,
+      });
+    });
   },
 
   showAddForm() {
@@ -278,6 +236,7 @@ Page({
         points_cost: '',
         inventory: 0,
         image: '',
+        imageUrl: '',
       },
     });
   },
@@ -285,6 +244,10 @@ Page({
   selectImage(e) {
     const src = e.currentTarget.dataset.src;
     this.setData({ 'formData.image': src });
+  },
+
+  removeImage() {
+    this.setData({ 'formData.image': '', 'formData.imageUrl': '' });
   },
 
   showEditForm(e) {
@@ -296,11 +259,21 @@ Page({
       image: prize.image || '',
     };
     
-    this.setData({
+    const data = {
       showForm: true,
       editingPrize: prize,
       formData: formData,
-    });
+    };
+    
+    if (prize.image && prize.image.startsWith('cloud://')) {
+      this.getTempFileURL(prize.image).then(url => {
+        this.setData({ ...data, 'formData.imageUrl': url });
+      }).catch(() => {
+        this.setData({ ...data, 'formData.imageUrl': '' });
+      });
+    } else {
+      this.setData({ ...data, 'formData.imageUrl': prize.image || '' });
+    }
   },
 
   hideForm() {
