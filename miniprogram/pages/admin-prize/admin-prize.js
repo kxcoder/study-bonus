@@ -195,20 +195,53 @@ Page({
 
   processPrizesForDisplay(prizes) {
     const promises = prizes.map((prize) => {
-      if (prize.image && prize.image.startsWith('cloud://')) {
-        return this.getTempFileURL(prize.image).then(url => {
-          prize.imageUrl = url;
-          return prize;
-        }).catch(() => {
-          prize.imageUrl = '';
-          return prize;
-        });
+      if (prize.image) {
+        if (prize.image.startsWith('cloud://')) {
+          return this.getTempFileURL(prize.image).then(url => {
+            prize.imageUrl = url;
+            return prize;
+          }).catch(() => {
+            prize.imageUrl = prize.image;
+            return prize;
+          });
+        } else if (prize.image.startsWith('data:')) {
+          return this.saveBase64ToTempFile(prize.image, `prize_${prize._id}`).then(tempPath => {
+            prize.imageUrl = tempPath;
+            return prize;
+          }).catch(() => {
+            prize.imageUrl = '';
+            return prize;
+          });
+        } else {
+          prize.imageUrl = prize.image;
+          return Promise.resolve(prize);
+        }
       } else {
-        prize.imageUrl = prize.image || '';
+        prize.imageUrl = '';
         return Promise.resolve(prize);
       }
     });
     return Promise.all(promises);
+  },
+
+  saveBase64ToTempFile(base64Data, prefix) {
+    return new Promise((resolve, reject) => {
+      if (!base64Data || !base64Data.startsWith('data:')) {
+        reject(new Error('invalid base64'));
+        return;
+      }
+      const fs = wx.getFileSystemManager();
+      const tempFilePath = `${wx.env.USER_DATA_PATH}/${prefix || 'img'}_${Date.now()}.jpg`;
+      const base64 = base64Data.replace(/^data:image\/\w+;base64,/, '');
+      const buffer = wx.base64ToArrayBuffer(base64);
+      fs.writeFile({
+        filePath: tempFilePath,
+        data: buffer,
+        encoding: 'binary',
+        success: () => resolve(tempFilePath),
+        fail: () => reject(new Error('write fail')),
+      });
+    });
   },
 
   getTempFileURL(fileID) {
