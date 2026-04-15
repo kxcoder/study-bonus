@@ -58,11 +58,15 @@ Page({
         action: 'list',
       },
     }).then((res) => {
-      const prizes = res.result.prizes || [];
+      console.log('loadPrizes result:', JSON.stringify(res.result));
+      const prizes = res.result && res.result.prizes ? res.result.prizes : [];
       return this.processPrizesForDisplay(prizes);
     }).then(prizes => {
+      console.log('processPrizesForDisplay done, prizes:', prizes.length);
+      prizes.forEach((p, i) => console.log(`prize[${i}] ${p.name}: image=${p.image}, imageUrl=${p.imageUrl}`));
       this.setData({ prizes: prizes, loading: false });
-    }).catch(() => {
+    }).catch((err) => {
+      console.error('loadPrizes error:', err);
       this.setData({ loading: false });
     });
   },
