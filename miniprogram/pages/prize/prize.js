@@ -124,16 +124,21 @@ Page({
 
   getTempFileURL(fileID) {
     return new Promise((resolve, reject) => {
+      console.log('getTempFileURL called, fileID:', fileID);
       wx.cloud.getTempFileURL({
         fileList: [fileID],
         success: (res) => {
+          console.log('getTempFileURL success:', JSON.stringify(res));
           if (res.fileList && res.fileList[0] && res.fileList[0].tempFileURL) {
             resolve(res.fileList[0].tempFileURL);
           } else {
             reject(new Error('no URL'));
           }
         },
-        fail: reject,
+        fail: (err) => {
+          console.error('getTempFileURL fail:', err);
+          reject(err);
+        },
       });
     });
   },
