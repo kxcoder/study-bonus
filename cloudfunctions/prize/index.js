@@ -39,7 +39,30 @@ async function listPrizes(data) {
 
     const prizes = await db.collection('prizes').where(query).orderBy('points_cost', 'asc').get();
 
-    console.log('listPrizes result:', JSON.stringify(prizes.data));
+    console.log('listPrizes result count:', prizes.data.length);
+    
+    for (let prize of prizes.data) {
+      if (prize.image && prize.image.startsWith('cloud://')) {
+        try {
+          const result = await cloud.getTempFileURL({
+            fileList: [prize.image],
+          });
+          if (result.fileList && result.fileList[0] && result.fileList[0].tempFileURL) {
+            prize.imageUrl = result.fileList[0].tempFileURL;
+          } else {
+            prize.imageUrl = '';
+          }
+        } catch (e) {
+          console.log('getTempFileURL error:', e.message);
+          prize.imageUrl = '';
+        }
+      } else if (prize.image) {
+        prize.imageUrl = prize.image;
+      } else {
+        prize.imageUrl = '';
+      }
+    }
+    
     return { ok: true, prizes: prizes.data };
   } catch (err) {
     return { ok: false, error: err.message };
@@ -125,7 +148,27 @@ async function listAllPrizes(data) {
       .limit(pageSize)
       .get();
 
-    console.log('listAllPrizes result:', JSON.stringify(prizes.data));
+    for (let prize of prizes.data) {
+      if (prize.image && prize.image.startsWith('cloud://')) {
+        try {
+          const result = await cloud.getTempFileURL({
+            fileList: [prize.image],
+          });
+          if (result.fileList && result.fileList[0] && result.fileList[0].tempFileURL) {
+            prize.imageUrl = result.fileList[0].tempFileURL;
+          } else {
+            prize.imageUrl = '';
+          }
+        } catch (e) {
+          prize.imageUrl = '';
+        }
+      } else if (prize.image) {
+        prize.imageUrl = prize.image;
+      } else {
+        prize.imageUrl = '';
+      }
+    }
+
     return { ok: true, prizes: prizes.data, total: countResult.total };
   } catch (err) {
     return { ok: false, error: err.message };
