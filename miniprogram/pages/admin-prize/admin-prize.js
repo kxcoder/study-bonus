@@ -253,10 +253,12 @@ Page({
           if (res.fileList && res.fileList[0] && res.fileList[0].tempFileURL) {
             resolve(res.fileList[0].tempFileURL);
           } else {
-            reject(new Error('no URL'));
+            resolve(fileID);
           }
         },
-        fail: reject,
+        fail: () => {
+          resolve(fileID);
+        },
       });
     });
   },
